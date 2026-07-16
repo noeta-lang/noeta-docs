@@ -5,7 +5,7 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import pagefind from "astro-pagefind";
 import rehypeSlug from "rehype-slug";
-import remarkWikiLinks from "./src/lib/wiki-links-remark.mjs";
+import remarkDocLinks from "./src/lib/doc-links-remark.mjs";
 import remarkNoetaCode from "./src/lib/remark-noeta-code.mjs";
 
 export default defineConfig({
@@ -32,7 +32,7 @@ export default defineConfig({
     // amber-on-black theme that sits naturally inside "Ink & Signal".
     shikiConfig: { theme: "vesper" },
     smartypants: false,
-    remarkPlugins: [remarkWikiLinks, remarkNoetaCode],
+    remarkPlugins: [remarkDocLinks, remarkNoetaCode],
     rehypePlugins: [rehypeSlug],
   },
 });

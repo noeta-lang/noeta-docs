@@ -4,9 +4,9 @@ The [Noeta](https://noeta.dev) project & language documentation site — docs.no
 
 An [Astro](https://astro.build) static site on the shared [@noeta/theme](../noeta-theme)
 design system ("Ink & Signal"), deployed as a Cloudflare Worker with static assets. The
-content is the noeta repo's `docs/` (GitHub-wiki conventions: `Home.md`, `_Sidebar.md`,
-`[[wiki links]]`), compiled to pages at the site root and searchable via
-[Pagefind](https://pagefind.app).
+content is the noeta repo's `docs/` directory — versioned together with the code — as flat
+pages (`Home.md`, `_Sidebar.md` for navigation, `[[Page Name]]` cross-links), compiled to
+pages at the site root and searchable via [Pagefind](https://pagefind.app).
 
 ## How content flows
 
@@ -14,7 +14,7 @@ content is the noeta repo's `docs/` (GitHub-wiki conventions: `Home.md`, `_Sideb
   `../lang/docs` checkout when present, else a blobless sparse clone of the hosted repo
   (`NOETA_DOCS_REPO`/`NOETA_DOCS_REF`; `NOETA_SKIP_SYNC=1` to use what's there).
 - `Home.md` is served at `/`; every other page at `/<slug>` (`_Sidebar.md` drives nav order
-  and prev/next paging). Wiki links are rewritten at the mdast level so code blocks are
+  and prev/next paging). Cross-links are rewritten at the mdast level so code blocks are
   never touched.
 - ```` ```noeta ```` fences are highlighted by the shared `@noeta/theme/highlight`
   tokenizer; other languages go through shiki (vesper theme).

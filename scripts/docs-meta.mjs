@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { resolve, basename } from "node:path";
 import { parseSidebar, sidebarLinkSlugs } from "./parse-sidebar.mjs";
-import { rewriteWikiLinks, toDocSlug } from "./wiki-links.mjs";
+import { rewriteDocLinks, toDocSlug } from "./doc-links.mjs";
 
 // Resolve from the project root (process.cwd()) so this keeps working when
 // Astro bundles it into dist/.prerender/.
@@ -69,7 +69,7 @@ export function listDocs() {
     const titleMatch = raw.match(/^#\s+(.+)\s*$/m);
     const title = titleMatch ? titleMatch[1].trim() : sourcePath.replace(/-/g, " ");
     const description = extractDescription(raw);
-    const markdown = rewriteWikiLinks(raw);
+    const markdown = rewriteDocLinks(raw);
     const { datePublished, dateModified } = fileDates(filePath);
     return { slug, title, sourcePath, description, datePublished, dateModified, markdown };
   });

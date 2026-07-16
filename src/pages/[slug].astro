@@ -2,7 +2,7 @@
 /* Every doc page except Home, served at /<slug>. */
 import { getCollection, render } from "astro:content";
 import DocsShell from "../components/DocsShell.astro";
-import { toDocSlug } from "../../scripts/wiki-links.mjs";
+import { toDocSlug } from "../../scripts/doc-links.mjs";
 
 export async function getStaticPaths() {
   const docs = await getCollection("docs");

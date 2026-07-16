@@ -1,13 +1,13 @@
-// Parses the GitHub-Wiki-style _Sidebar.md into a structured list of items.
+// Parses the docs' _Sidebar.md into a structured list of items.
 // Supports:
 //   **Section Header**                           → { kind: 'section', title }
 //   [Text](Page-Slug)            (anywhere)      → { kind: 'link', title, slug }
 //   - [Text](Page-Slug)                          → { kind: 'link', title, slug }
-//   - [[Wiki Link]]                              → { kind: 'link', title, slug }
+//   - [[Page Name]]                              → { kind: 'link', title, slug }
 //   ---  or empty                                → skipped
 // Slugs are normalized via toDocSlug so they match the derivation everywhere.
 
-import { toDocSlug } from "./wiki-links.mjs";
+import { toDocSlug } from "./doc-links.mjs";
 
 export function parseSidebar(content) {
   const items = [];
@@ -19,9 +19,9 @@ export function parseSidebar(content) {
     // (the noeta sidebar uses `### [Home](Home)` for the top link).
     const cleaned = line.replace(/^[-*]\s+/, "").replace(/^#{1,6}\s+/, "");
 
-    const wiki = cleaned.match(/\[\[([^\]]+)\]\]/);
-    if (wiki) {
-      const name = wiki[1].trim();
+    const bracket = cleaned.match(/\[\[([^\]]+)\]\]/);
+    if (bracket) {
+      const name = bracket[1].trim();
       items.push({ kind: "link", title: name, slug: toDocSlug(name) });
       continue;
     }

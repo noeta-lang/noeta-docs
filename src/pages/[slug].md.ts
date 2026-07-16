@@ -1,4 +1,4 @@
-/* /<slug>.md — each doc's raw markdown (wiki links rewritten to this site's
+/* /<slug>.md — each doc's raw markdown (cross-links rewritten to this site's
  * routes), for agents and curl. Home is at /home.md. */
 import type { APIRoute, GetStaticPaths } from "astro";
 import { listDocs } from "../../scripts/docs-meta.mjs";

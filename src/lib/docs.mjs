@@ -1,14 +1,14 @@
 // Docs navigation helpers, shared by the pages and the .md / llms.txt
 // endpoints. Slugs, ordering, and titles all come from the same utilities:
 //   - scripts/docs-meta.mjs     → listDocs() (slug, title, description, dates,
-//                                  wiki-rewritten markdown), _Sidebar.md order
+//                                  cross-link-rewritten markdown), _Sidebar.md order
 //   - scripts/parse-sidebar.mjs → parseSidebar() (sections + links)
 
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseSidebar } from "../../scripts/parse-sidebar.mjs";
 import { listDocs } from "../../scripts/docs-meta.mjs";
-import { pathForSlug } from "../../scripts/wiki-links.mjs";
+import { pathForSlug } from "../../scripts/doc-links.mjs";
 
 const docsDir = resolve(process.cwd(), "content", "docs");
 

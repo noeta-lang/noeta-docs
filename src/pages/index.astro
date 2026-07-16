@@ -2,7 +2,7 @@
 /* Home.md, served at the site root. */
 import { getCollection, render } from "astro:content";
 import DocsShell from "../components/DocsShell.astro";
-import { toDocSlug } from "../../scripts/wiki-links.mjs";
+import { toDocSlug } from "../../scripts/doc-links.mjs";
 
 const docs = await getCollection("docs");
 const entry = docs.find((d) => toDocSlug(d.id) === "home");

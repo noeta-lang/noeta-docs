@@ -1,17 +1,18 @@
-// Remark plugin: rewrites GitHub-Wiki link syntax to this site's root routes.
+// Remark plugin: rewrites the docs' cross-link shorthand to this site's root
+// routes.
 // Operating on the mdast means fenced code blocks are skipped automatically —
 // a literal `[[rules]]` inside a code block is left intact.
 //
-// Two cases (mirroring scripts/wiki-links.mjs, which handles the raw .md
+// Two cases (mirroring scripts/doc-links.mjs, which handles the raw .md
 // endpoints):
 //   [[Page Name]]            (in text)  → link to /page-name  ([[Home]] → /)
 //   [Text](Bare-Page-Slug)   (a link)   → /<slug>
 // External URLs, anchors, absolute paths, and targets containing `/` or `.`
 // are left untouched.
 
-import { pathForSlug, toDocSlug } from "../../scripts/wiki-links.mjs";
+import { pathForSlug, toDocSlug } from "../../scripts/doc-links.mjs";
 
-function isBareWikiTarget(target) {
+function isBarePageTarget(target) {
   if (/^[a-z][a-z0-9+.-]*:/i.test(target)) return false; // scheme: URLs
   if (target.startsWith("#")) return false; // fragment
   if (target.startsWith("/")) return false; // absolute
@@ -25,9 +26,9 @@ function rewriteTarget(target) {
   return pathForSlug(toDocSlug(page)) + (frag ? `#${frag}` : "");
 }
 
-// Split a text value containing [[Wiki Link]] markers into a mix of text and
-// link mdast nodes.
-function expandWikiText(value) {
+// Split a text value containing [[Page Name]] bracket links into a mix of text
+// and link mdast nodes.
+function expandBracketLinks(value) {
   const out = [];
   const re = /\[\[([^\]]+)\]\]/g;
   let last = 0;
@@ -51,14 +52,14 @@ function walk(node) {
 
   const next = [];
   for (const child of node.children) {
-    if (child.type === "link" && typeof child.url === "string" && isBareWikiTarget(child.url)) {
+    if (child.type === "link" && typeof child.url === "string" && isBarePageTarget(child.url)) {
       child.url = rewriteTarget(child.url);
     }
 
     // `code` / `inlineCode` nodes carry their content on `.value` with no
     // children, so walk() returns early for them — never rewritten.
     if (child.type === "text" && child.value.includes("[[")) {
-      next.push(...expandWikiText(child.value));
+      next.push(...expandBracketLinks(child.value));
       continue;
     }
 
@@ -68,6 +69,6 @@ function walk(node) {
   node.children = next;
 }
 
-export default function remarkWikiLinks() {
+export default function remarkDocLinks() {
   return (tree) => walk(tree);
 }
