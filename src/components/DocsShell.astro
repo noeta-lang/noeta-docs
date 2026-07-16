@@ -1,0 +1,100 @@
+---
+/* Docs chrome: sidebar (pagefind search + _Sidebar.md nav), the article body
+ * (slot — Astro's <Content />), updated-on, edit-on-GitHub, and prev/next
+ * paging. Slugs live at the site root: Home at /, others at /<slug>. */
+import Search from "astro-pagefind/components/Search.astro";
+import Base from "../layouts/Base.astro";
+import { getSidebar, getSidebarLinks } from "../lib/docs.mjs";
+import { listDocs } from "../../scripts/docs-meta.mjs";
+import { SITE } from "../lib/site";
+
+interface Props {
+  slug: string;
+  sourcePath: string;
+  title: string;
+}
+const { slug, sourcePath, title } = Astro.props;
+
+const sidebar = getSidebar();
+const links = getSidebarLinks();
+const idx = links.findIndex((l) => l.slug === slug);
+const prev = idx > 0 ? links[idx - 1] : null;
+const next = idx >= 0 && idx < links.length - 1 ? links[idx + 1] : null;
+
+const path = slug === "home" ? "/" : `/${slug}`;
+const editUrl = `https://github.com/${SITE.docsRepo}/edit/${SITE.docsBranch}/docs/${sourcePath}.md`;
+
+const info = listDocs().find((d) => d.slug === slug);
+const description = info?.description || undefined;
+const datePublished = info?.datePublished ?? new Date().toISOString();
+const dateModified = info?.dateModified ?? datePublished;
+
+const pageTitle = slug === "home" ? SITE.title : `${title} — Noeta Docs`;
+const formatDate = (iso: string) => iso.slice(0, 10);
+---
+
+<Base
+  title={pageTitle}
+  description={description}
+  path={path}
+  article={{ headline: title, datePublished, dateModified }}
+>
+  <main class="wrap docs-grid">
+    <aside class="docs-sidebar">
+      <Search className="docs-search" searchboxOptions={{ placeholder: "Search the docs…" }} />
+      <details class="docs-nav" open>
+        <summary>Contents</summary>
+        <nav aria-label="Documentation">
+          <ul>
+            {
+              sidebar.map((entry) =>
+                entry.kind === "section" ? (
+                  <li class="docs-section-label">{entry.title}</li>
+                ) : (
+                  <li>
+                    <a href={entry.path} class={entry.slug === slug ? "active" : undefined}>
+                      {entry.title}
+                    </a>
+                  </li>
+                ),
+              )
+            }
+          </ul>
+        </nav>
+      </details>
+    </aside>
+
+    <article class="docs-article" data-pagefind-body>
+      <header class="docs-article-head" data-pagefind-ignore>
+        <time class="ts" datetime={dateModified}>Updated {formatDate(dateModified)}</time>
+      </header>
+
+      <div class="prose docs-prose"><slot /></div>
+
+      <footer class="docs-article-foot" data-pagefind-ignore>
+        <a href={editUrl} class="edit-link" target="_blank" rel="noopener">Edit on GitHub →</a>
+      </footer>
+
+      {
+        (prev || next) && (
+          <nav class="docs-pager" aria-label="Documentation pagination" data-pagefind-ignore>
+            {prev ? (
+              <a href={prev.path} class="pager-link pager-prev">
+                <span class="pager-dir">← Previous</span>
+                <span class="pager-title">{prev.title}</span>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <a href={next.path} class="pager-link pager-next">
+                <span class="pager-dir">Next →</span>
+                <span class="pager-title">{next.title}</span>
+              </a>
+            ) : null}
+          </nav>
+        )
+      }
+    </article>
+  </main>
+</Base>

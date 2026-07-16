@@ -1,0 +1,17 @@
+---
+/* Home.md, served at the site root. */
+import { getCollection, render } from "astro:content";
+import DocsShell from "../components/DocsShell.astro";
+import { toDocSlug } from "../../scripts/wiki-links.mjs";
+
+const docs = await getCollection("docs");
+const entry = docs.find((d) => toDocSlug(d.id) === "home");
+if (!entry) throw new Error("content/docs/Home.md is missing — run `pnpm run sync-docs`");
+
+const { Content, headings } = await render(entry);
+const title = headings.find((h) => h.depth === 1)?.text ?? "Noeta";
+---
+
+<DocsShell slug="home" sourcePath={entry.id} title={title}>
+  <Content />
+</DocsShell>

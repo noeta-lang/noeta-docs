@@ -1,0 +1,25 @@
+---
+/* Every doc page except Home, served at /<slug>. */
+import { getCollection, render } from "astro:content";
+import DocsShell from "../components/DocsShell.astro";
+import { toDocSlug } from "../../scripts/wiki-links.mjs";
+
+export async function getStaticPaths() {
+  const docs = await getCollection("docs");
+  return docs
+    .map((entry) => ({ entry, slug: toDocSlug(entry.id) }))
+    .filter(({ slug }) => slug !== "home")
+    .map(({ entry, slug }) => ({ params: { slug }, props: { entry } }));
+}
+
+const { slug } = Astro.params;
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+
+// Title is the leading H1, matching listDocs()' derivation.
+const title = headings.find((h) => h.depth === 1)?.text ?? entry.id.replace(/-/g, " ");
+---
+
+<DocsShell slug={slug} sourcePath={entry.id} title={title}>
+  <Content />
+</DocsShell>

@@ -1,0 +1,410 @@
+/* docs.noeta.dev — documentation layout. Tokens, chrome, and shared components
+ * come from @noeta/theme (imported in the layout before this file). */
+
+/* --- shell: sidebar + article ---------------------------------------------------------- */
+
+.docs-grid {
+  display: grid;
+  grid-template-columns: 17rem minmax(0, 1fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: start;
+  padding-block: 2.5rem 4rem;
+}
+
+@media (max-width: 56rem) {
+  .docs-grid {
+    grid-template-columns: 1fr;
+    padding-block: 1.5rem 3rem;
+  }
+}
+
+/* --- sidebar ----------------------------------------------------------------------------- */
+
+.docs-sidebar {
+  position: sticky;
+  top: 5.25rem;
+  max-height: calc(100vh - 6.5rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding-right: 0.25rem;
+}
+
+@media (max-width: 56rem) {
+  .docs-sidebar {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.docs-nav summary {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--signal);
+  cursor: pointer;
+  padding: 0.6rem 0;
+}
+
+@media (max-width: 56rem) {
+  .docs-nav summary {
+    display: list-item;
+  }
+}
+
+.docs-nav ul {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+}
+
+.docs-section-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-2);
+  margin: 1.4rem 0 0.45rem;
+}
+
+.docs-section-label::before {
+  content: "// ";
+}
+
+.docs-nav li:first-child .docs-section-label,
+.docs-nav li:first-child a {
+  margin-top: 0;
+}
+
+.docs-nav a {
+  display: block;
+  padding: 0.28rem 0.6rem;
+  margin-left: -0.6rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  color: var(--paper-1);
+  border-left: 2px solid transparent;
+  transition: color 140ms ease, background 140ms ease;
+}
+
+.docs-nav a:hover {
+  color: var(--paper-0);
+  background: color-mix(in srgb, var(--ink-2) 70%, transparent);
+}
+
+.docs-nav a.active {
+  color: var(--signal-bright);
+  background: var(--signal-dim);
+  border-left-color: var(--signal);
+  border-radius: 0 6px 6px 0;
+}
+
+/* --- pagefind search (@pagefind/component-ui, themed via --pf-* vars) ----------------------- */
+
+pagefind-searchbox.docs-search {
+  display: block;
+  margin-bottom: 1.2rem;
+  --pf-font: var(--font-body);
+  --pf-text: var(--paper-0);
+  --pf-text-secondary: var(--paper-1);
+  --pf-text-muted: var(--paper-2);
+  --pf-background: var(--ink-1);
+  --pf-border: var(--line-strong);
+  --pf-border-focus: var(--signal);
+  --pf-border-radius: 8px;
+  --pf-hover: var(--ink-2);
+  --pf-outline-focus: var(--signal);
+  --pf-input-height: 2.4rem;
+  --pf-skeleton: var(--ink-2);
+  --pf-skeleton-shine: var(--ink-3);
+  --pf-shadow-sm: 0 8px 30px -12px rgba(0, 0, 0, 0.8);
+  --pf-shadow-md: 0 14px 44px -16px rgba(0, 0, 0, 0.85);
+  --pf-shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.9);
+}
+
+pagefind-searchbox.docs-search input {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+pagefind-searchbox.docs-search mark {
+  background: var(--signal-dim);
+  color: var(--signal-bright);
+  border-radius: 3px;
+  padding: 0 0.15em;
+}
+
+/* --- article ------------------------------------------------------------------------------- */
+
+.docs-article {
+  min-width: 0;
+}
+
+.docs-article-head {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.docs-article-head .ts {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--paper-2);
+}
+
+/* --- prose typography ------------------------------------------------------------------------ */
+
+.docs-prose {
+  font-size: 1rem;
+  line-height: 1.72;
+}
+
+.docs-prose > :first-child {
+  margin-top: 0;
+}
+
+.docs-prose h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.5vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.2rem;
+}
+
+.docs-prose h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.8rem;
+  line-height: 1.15;
+  margin: 2.6rem 0 0.8rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--line);
+}
+
+.docs-prose h3 {
+  font-size: 1.15rem;
+  font-weight: 550;
+  margin: 2rem 0 0.6rem;
+}
+
+.docs-prose h4 {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  margin: 1.6rem 0 0.5rem;
+  color: var(--signal-bright);
+}
+
+/* heading anchors (rehype-slug ids) get breathing room under the sticky header */
+.docs-prose h1[id],
+.docs-prose h2[id],
+.docs-prose h3[id],
+.docs-prose h4[id] {
+  scroll-margin-top: 5rem;
+}
+
+.docs-prose p {
+  margin: 0 0 1.05rem;
+  color: var(--paper-0);
+}
+
+.docs-prose a {
+  color: var(--signal-bright);
+  border-bottom: 1px dotted rgba(255, 196, 107, 0.45);
+  transition: border-color 140ms ease;
+}
+
+.docs-prose a:hover {
+  border-bottom-color: var(--signal-bright);
+}
+
+.docs-prose strong {
+  font-weight: 600;
+}
+
+.docs-prose ul,
+.docs-prose ol {
+  margin: 0 0 1.05rem;
+  padding-left: 1.4rem;
+}
+
+.docs-prose li {
+  margin-bottom: 0.35rem;
+}
+
+.docs-prose li::marker {
+  color: var(--signal);
+}
+
+.docs-prose blockquote {
+  margin: 1.4rem 0;
+  padding: 0.2rem 0 0.2rem 1.2rem;
+  border-left: 2px solid var(--signal);
+  color: var(--paper-1);
+  font-style: italic;
+}
+
+.docs-prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2.4rem 0;
+}
+
+/* code blocks: shiki (.astro-code, vesper) and the Noeta highlighter
+ * (.noeta-code) share one surface. Shiki inlines vesper's background; override
+ * it so every block sits on the theme's ink. */
+.docs-prose pre {
+  margin: 1.2rem 0 1.4rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--ink-1) 88%, transparent) !important;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  tab-size: 4;
+}
+
+.docs-prose pre code {
+  font-family: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+.docs-prose .noeta-code code {
+  color: var(--paper-0);
+}
+
+/* tables */
+.docs-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2rem 0 1.4rem;
+  font-size: 0.92rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.docs-prose th,
+.docs-prose td {
+  text-align: left;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+}
+
+.docs-prose th {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper-1);
+  background: color-mix(in srgb, var(--ink-1) 80%, transparent);
+}
+
+.docs-prose img {
+  max-width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+/* --- article foot: edit link + pager ----------------------------------------------------------- */
+
+.docs-article-foot {
+  margin-top: 2.6rem;
+}
+
+.edit-link {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--paper-2);
+  transition: color 140ms ease;
+}
+
+.edit-link:hover {
+  color: var(--signal-bright);
+}
+
+.docs-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  margin-top: 1.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1.05rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.pager-link:hover {
+  border-color: rgba(230, 159, 55, 0.35);
+  background: color-mix(in srgb, var(--ink-1) 85%, transparent);
+}
+
+.pager-next {
+  text-align: right;
+}
+
+.pager-dir {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-2);
+}
+
+.pager-title {
+  color: var(--signal-bright);
+  font-size: 0.95rem;
+}
+
+/* --- 404 ------------------------------------------------------------------------------------------ */
+
+.docs-404 {
+  padding-block: clamp(4rem, 12vh, 8rem);
+}
+
+.docs-404 h1 {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  line-height: 1.05;
+}
+
+.docs-404 .accent {
+  font-style: italic;
+  color: var(--signal);
+}
+
+.docs-404 .dek {
+  margin-top: 1.2rem;
+  color: var(--paper-1);
+}
+
+.docs-404 .cta-row {
+  display: flex;
+  gap: 0.9rem;
+  margin-top: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .docs-nav a,
+  .pager-link,
+  .edit-link {
+    transition: none;
+  }
+}

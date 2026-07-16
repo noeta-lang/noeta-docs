@@ -1,11 +1,16 @@
 {
-  // noeta-docs Worker — served at docs.noeta.dev. Deploy with your own Cloudflare account:
+  // noeta-docs Worker — served at docs.noeta.dev. A static-assets Worker: the
+  // Astro build output in dist/ is served directly by Cloudflare (no Worker
+  // script).
   //   pnpm run deploy
   // To bind the custom domain, add a route once the zone is on Cloudflare:
   //   "routes": [{ "pattern": "docs.noeta.dev", "custom_domain": true }]
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "noeta-docs",
-  "main": "src/index.ts",
   "compatibility_date": "2025-07-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
   "observability": { "enabled": true }
 }

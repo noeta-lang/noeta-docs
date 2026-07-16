@@ -1,0 +1,75 @@
+name: Build and deploy
+
+# Push to main → sync the noeta repo's docs/, build the site (including the
+# pagefind index and the Playwright-rendered OG image) and deploy the static
+# assets to Cloudflare Workers.
+#
+# The design system is a sibling-checkout file: dependency
+# ("@noeta/theme": "file:../noeta-theme"), so the site is checked out into
+# site/ with the theme cloned next to it — the same shape as local disk. The
+# docs themselves are fetched by scripts/sync-docs.mjs (prebuild), which
+# sparse-clones the language repo when no local checkout exists.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: site
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v6
+        with:
+          path: site
+
+      - name: Checkout @noeta/theme
+        uses: actions/checkout@v6
+        with:
+          repository: noeta-lang/noeta-theme
+          path: noeta-theme
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: site/package.json
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('site/pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        run: pnpm exec playwright-core install --with-deps chromium
+
+      - name: Build (docs sync + site + pagefind + OG image)
+        run: pnpm run build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: site
+          command: deploy

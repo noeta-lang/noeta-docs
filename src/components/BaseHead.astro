@@ -1,0 +1,70 @@
+---
+/* Document <head>: SEO meta, OpenGraph/Twitter cards, and Schema.org JSON-LD.
+ * Doc pages pass `article` metadata and get TechArticle structured data; the
+ * WebSite node rides along on every page. */
+import { SITE } from "../lib/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Page path for the canonical URL, e.g. "/getting-started". */
+  path?: string;
+  /** When set, emit TechArticle JSON-LD for this doc page. */
+  article?: { headline: string; datePublished: string; dateModified: string };
+}
+
+const { title = SITE.title, description = SITE.description, path = "/", article } = Astro.props;
+const canonical = new URL(path, SITE.url).href.replace(/\/$/, "") || SITE.url;
+
+const graph: Record<string, unknown>[] = [
+  {
+    "@type": "WebSite",
+    "@id": `${SITE.url}/#website`,
+    name: SITE.name,
+    url: SITE.url,
+    description: SITE.description,
+    about: { "@type": "SoftwareApplication", name: "Noeta", url: SITE.links.home },
+  },
+];
+if (article) {
+  graph.push({
+    "@type": "TechArticle",
+    headline: article.headline,
+    description,
+    datePublished: article.datePublished,
+    dateModified: article.dateModified,
+    mainEntityOfPage: canonical,
+    author: { "@type": "Organization", name: "Noeta", url: SITE.links.home },
+    publisher: { "@type": "Organization", name: "Noeta", url: SITE.links.home },
+  });
+}
+const jsonLdText = JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replaceAll(
+  "</",
+  "<\\/",
+);
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="theme-color" content={SITE.themeColor} />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+
+<meta property="og:type" content={article ? "article" : "website"} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={SITE.ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={SITE.ogImage} />
+
+<script is:inline type="application/ld+json" set:html={jsonLdText} />
