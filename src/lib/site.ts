@@ -11,6 +11,10 @@ export const SITE = {
   ogImage: "https://docs.noeta.dev/images/og-image.png",
   themeColor: "#0b0d10",
   themeColorLight: "#f6f8fb",
+  /** The Noeta release these docs document, baked in at build from NOETA_VERSION (the deploy
+   *  workflow sets it to the latest release tag). null on an unreleased checkout — local dev, or
+   *  before the first release — so the UI simply omits the version. */
+  version: process.env.NOETA_VERSION ?? null,
   /** GitHub repo + branch the docs are synced from — drives "Edit on GitHub". */
   docsRepo: "noeta-lang/noeta",
   docsBranch: "main",

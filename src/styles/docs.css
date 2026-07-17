@@ -1,6 +1,29 @@
 /* docs.noeta.dev — documentation layout. Tokens, chrome, and shared components
  * come from @noeta/theme (imported in the layout before this file). */
 
+/* --- header: wordmark + version pill --------------------------------------------------- */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.version-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-2);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.version-pill:hover {
+  color: var(--accent-bright);
+  border-color: var(--accent);
+}
+
 /* --- shell: sidebar + article ---------------------------------------------------------- */
 
 .docs-grid {
@@ -66,6 +89,8 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-2);
+  /* left padding matches the links' so the section label and link text share a left edge */
+  padding-left: 0.6rem;
   margin: 1.4rem 0 0.45rem;
 }
 
@@ -80,8 +105,9 @@
 
 .docs-nav a {
   display: block;
+  /* horizontal padding gives the hover/active fill breathing room; the text left edge lines up
+     with the section labels (which carry the same 0.6rem left padding) */
   padding: 0.28rem 0.6rem;
-  margin-left: -0.6rem;
   border-radius: 6px;
   font-size: 0.92rem;
   color: var(--text-1);
@@ -193,6 +219,15 @@ pagefind-searchbox.docs-search {
 pagefind-searchbox.docs-search input {
   font-family: var(--font-mono);
   font-size: 0.85rem;
+}
+
+/* The results panel defaults to `top: 100%` with no top border, so it sits flush against the
+   input and hides its focus border. Drop it a few pixels and give it its own full border/radius so
+   the input reads as a separate, complete field above the results. */
+pagefind-searchbox.docs-search .pf-searchbox-dropdown {
+  top: calc(100% + 6px);
+  border-top: 1px solid var(--pf-border);
+  border-radius: var(--pf-border-radius);
 }
 
 pagefind-searchbox.docs-search mark {
@@ -310,6 +345,45 @@ pagefind-searchbox.docs-search mark {
   padding: 0.2rem 0 0.2rem 1.2rem;
   border-left: 2px solid var(--accent);
   color: var(--text-1);
+}
+
+/* GitHub-style alerts: `> [!NOTE]` etc., turned into titled callouts by remark-alerts.mjs. Each
+   type sets `--alert` to its accent; the border, tint, and title colour all follow it. */
+.docs-prose .alert {
+  --alert: var(--accent);
+  margin: 1.4rem 0;
+  padding: 0.8rem 1.1rem;
+  border-left: 3px solid var(--alert);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--alert) 9%, transparent);
+}
+.docs-prose .alert > :first-child {
+  margin-top: 0;
+}
+.docs-prose .alert > :last-child {
+  margin-bottom: 0;
+}
+.docs-prose .alert-title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--alert);
+}
+.docs-prose .alert-note,
+.docs-prose .alert-important {
+  --alert: var(--accent);
+}
+.docs-prose .alert-tip {
+  --alert: var(--accent-2);
+}
+.docs-prose .alert-warning {
+  --alert: var(--warning);
+}
+.docs-prose .alert-caution {
+  --alert: var(--danger);
 }
 
 .docs-prose hr {

@@ -7,6 +7,7 @@ import pagefind from "astro-pagefind";
 import rehypeSlug from "rehype-slug";
 import remarkDocLinks from "./src/lib/doc-links-remark.mjs";
 import remarkNoetaCode from "./src/lib/remark-noeta-code.mjs";
+import remarkAlerts from "./src/lib/remark-alerts.mjs";
 
 export default defineConfig({
   site: "https://docs.noeta.dev",
@@ -37,7 +38,7 @@ export default defineConfig({
       defaultColor: false,
     },
     smartypants: false,
-    remarkPlugins: [remarkDocLinks, remarkNoetaCode],
+    remarkPlugins: [remarkDocLinks, remarkNoetaCode, remarkAlerts],
     rehypePlugins: [rehypeSlug],
   },
 });
