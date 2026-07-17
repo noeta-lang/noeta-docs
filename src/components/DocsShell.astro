@@ -41,7 +41,57 @@ const formatDate = (iso: string) => iso.slice(0, 10);
 >
   <main class="wrap docs-grid">
     <aside class="docs-sidebar">
-      <Search className="docs-search" searchboxOptions={{ placeholder: "Search the docs…" }} />
+      <button
+        type="button"
+        class="docs-search-trigger"
+        id="docs-search-open"
+        aria-haspopup="dialog"
+        aria-controls="docs-search-dialog"
+      >
+        <svg class="dss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span class="dss-label">Search the docs…</span>
+        <kbd class="dss-key">/</kbd>
+      </button>
+      <dialog class="docs-search-dialog" id="docs-search-dialog" aria-label="Search the docs">
+        <Search
+          className="docs-search"
+          searchboxOptions={{ placeholder: "Search the docs…", shortcut: "false" }}
+        />
+      </dialog>
+      <script>
+        // Trigger-as-input opens a modal search; "/" opens it too (unless already typing in a
+        // field), Escape/backdrop close it. The pagefind-searchbox's own shortcut is disabled
+        // (shortcut="false") so this is the single entry point.
+        const openBtn = document.getElementById("docs-search-open");
+        const dialog = document.getElementById("docs-search-dialog");
+        if (openBtn && dialog instanceof HTMLDialogElement) {
+          const focusInput = () =>
+            requestAnimationFrame(() => dialog.querySelector("input")?.focus());
+          const open = () => {
+            if (!dialog.open) {
+              dialog.showModal();
+              focusInput();
+            }
+          };
+          openBtn.addEventListener("click", open);
+          document.addEventListener("keydown", (event) => {
+            if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return;
+            const target = event.target as HTMLElement | null;
+            const tag = target?.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) return;
+            if (dialog.open) return;
+            event.preventDefault();
+            open();
+          });
+          // Click on the backdrop (the dialog element itself, outside the panel) closes it.
+          dialog.addEventListener("click", (event) => {
+            if (event.target === dialog) dialog.close();
+          });
+        }
+      </script>
       <details class="docs-nav" open>
         <summary>Contents</summary>
         <nav aria-label="Documentation">
