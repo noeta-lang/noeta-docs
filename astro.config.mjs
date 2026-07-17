@@ -28,9 +28,14 @@ export default defineConfig({
   ],
   markdown: {
     // ```noeta fences are handled by remarkNoetaCode (the shared @noeta/theme
-    // highlighter); shiki takes the other languages. Vesper is a warm
-    // amber-on-black theme that sits naturally inside "Ink & Signal".
-    shikiConfig: { theme: "vesper" },
+    // highlighter); shiki takes the other languages. Dual themes with
+    // defaultColor:false emit --shiki-light/--shiki-dark custom properties per
+    // token, so code blocks follow the site's light/dark mode (wired up in
+    // docs.css). Cool, neutral GitHub themes to match "Signal".
+    shikiConfig: {
+      themes: { light: "github-light-default", dark: "github-dark-default" },
+      defaultColor: false,
+    },
     smartypants: false,
     remarkPlugins: [remarkDocLinks, remarkNoetaCode],
     rehypePlugins: [rehypeSlug],

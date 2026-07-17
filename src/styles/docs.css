@@ -43,7 +43,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--signal);
+  color: var(--accent);
   cursor: pointer;
   padding: 0.6rem 0;
 }
@@ -65,7 +65,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--paper-2);
+  color: var(--text-2);
   margin: 1.4rem 0 0.45rem;
 }
 
@@ -84,20 +84,20 @@
   margin-left: -0.6rem;
   border-radius: 6px;
   font-size: 0.92rem;
-  color: var(--paper-1);
+  color: var(--text-1);
   border-left: 2px solid transparent;
   transition: color 140ms ease, background 140ms ease;
 }
 
 .docs-nav a:hover {
-  color: var(--paper-0);
-  background: color-mix(in srgb, var(--ink-2) 70%, transparent);
+  color: var(--text-0);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
 }
 
 .docs-nav a.active {
-  color: var(--signal-bright);
-  background: var(--signal-dim);
-  border-left-color: var(--signal);
+  color: var(--accent-bright);
+  background: var(--accent-dim);
+  border-left-color: var(--accent);
   border-radius: 0 6px 6px 0;
 }
 
@@ -107,18 +107,18 @@ pagefind-searchbox.docs-search {
   display: block;
   margin-bottom: 1.2rem;
   --pf-font: var(--font-body);
-  --pf-text: var(--paper-0);
-  --pf-text-secondary: var(--paper-1);
-  --pf-text-muted: var(--paper-2);
-  --pf-background: var(--ink-1);
+  --pf-text: var(--text-0);
+  --pf-text-secondary: var(--text-1);
+  --pf-text-muted: var(--text-2);
+  --pf-background: var(--surface-1);
   --pf-border: var(--line-strong);
-  --pf-border-focus: var(--signal);
+  --pf-border-focus: var(--accent);
   --pf-border-radius: 8px;
-  --pf-hover: var(--ink-2);
-  --pf-outline-focus: var(--signal);
+  --pf-hover: var(--surface-2);
+  --pf-outline-focus: var(--accent);
   --pf-input-height: 2.4rem;
-  --pf-skeleton: var(--ink-2);
-  --pf-skeleton-shine: var(--ink-3);
+  --pf-skeleton: var(--surface-2);
+  --pf-skeleton-shine: var(--surface-3);
   --pf-shadow-sm: 0 8px 30px -12px rgba(0, 0, 0, 0.8);
   --pf-shadow-md: 0 14px 44px -16px rgba(0, 0, 0, 0.85);
   --pf-shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.9);
@@ -130,8 +130,8 @@ pagefind-searchbox.docs-search input {
 }
 
 pagefind-searchbox.docs-search mark {
-  background: var(--signal-dim);
-  color: var(--signal-bright);
+  background: var(--accent-dim);
+  color: var(--accent-bright);
   border-radius: 3px;
   padding: 0 0.15em;
 }
@@ -150,7 +150,7 @@ pagefind-searchbox.docs-search mark {
 .docs-article-head .ts {
   font-family: var(--font-mono);
   font-size: 0.78rem;
-  color: var(--paper-2);
+  color: var(--text-2);
 }
 
 /* --- prose typography ------------------------------------------------------------------------ */
@@ -165,19 +165,20 @@ pagefind-searchbox.docs-search mark {
 }
 
 .docs-prose h1 {
-  font-family: var(--font-display);
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: 640;
   font-size: clamp(2.2rem, 4.5vw, 3rem);
-  line-height: 1.08;
-  letter-spacing: -0.01em;
+  line-height: 1.1;
+  letter-spacing: -0.028em;
   margin: 0 0 1.2rem;
 }
 
 .docs-prose h2 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.8rem;
-  line-height: 1.15;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   margin: 2.6rem 0 0.8rem;
   padding-top: 1.6rem;
   border-top: 1px solid var(--line);
@@ -194,7 +195,7 @@ pagefind-searchbox.docs-search mark {
   font-size: 0.9rem;
   letter-spacing: 0.06em;
   margin: 1.6rem 0 0.5rem;
-  color: var(--signal-bright);
+  color: var(--accent-bright);
 }
 
 /* heading anchors (rehype-slug ids) get breathing room under the sticky header */
@@ -207,17 +208,17 @@ pagefind-searchbox.docs-search mark {
 
 .docs-prose p {
   margin: 0 0 1.05rem;
-  color: var(--paper-0);
+  color: var(--text-0);
 }
 
 .docs-prose a {
-  color: var(--signal-bright);
-  border-bottom: 1px dotted rgba(255, 196, 107, 0.45);
+  color: var(--accent-bright);
+  border-bottom: 1px dotted color-mix(in srgb, var(--accent) 45%, transparent);
   transition: border-color 140ms ease;
 }
 
 .docs-prose a:hover {
-  border-bottom-color: var(--signal-bright);
+  border-bottom-color: var(--accent-bright);
 }
 
 .docs-prose strong {
@@ -235,15 +236,14 @@ pagefind-searchbox.docs-search mark {
 }
 
 .docs-prose li::marker {
-  color: var(--signal);
+  color: var(--accent);
 }
 
 .docs-prose blockquote {
   margin: 1.4rem 0;
   padding: 0.2rem 0 0.2rem 1.2rem;
-  border-left: 2px solid var(--signal);
-  color: var(--paper-1);
-  font-style: italic;
+  border-left: 2px solid var(--accent);
+  color: var(--text-1);
 }
 
 .docs-prose hr {
@@ -260,7 +260,7 @@ pagefind-searchbox.docs-search mark {
   padding: 1rem 1.15rem;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--ink-1) 88%, transparent) !important;
+  background: color-mix(in srgb, var(--surface-1) 88%, transparent) !important;
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: 0.82rem;
@@ -278,7 +278,22 @@ pagefind-searchbox.docs-search mark {
 }
 
 .docs-prose .noeta-code code {
-  color: var(--paper-0);
+  color: var(--text-0);
+}
+
+/* shiki (non-noeta fences) — dual-theme custom props follow the site mode.
+ * The block background comes from the theme surface (above); only the token
+ * foregrounds switch here. */
+.docs-prose .astro-code,
+.docs-prose .astro-code span {
+  color: var(--shiki-dark);
+}
+
+@media (prefers-color-scheme: light) {
+  .docs-prose .astro-code,
+  .docs-prose .astro-code span {
+    color: var(--shiki-light);
+  }
 }
 
 /* tables */
@@ -303,8 +318,8 @@ pagefind-searchbox.docs-search mark {
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--paper-1);
-  background: color-mix(in srgb, var(--ink-1) 80%, transparent);
+  color: var(--text-1);
+  background: color-mix(in srgb, var(--surface-1) 80%, transparent);
 }
 
 .docs-prose img {
@@ -322,12 +337,12 @@ pagefind-searchbox.docs-search mark {
 .edit-link {
   font-family: var(--font-mono);
   font-size: 0.82rem;
-  color: var(--paper-2);
+  color: var(--text-2);
   transition: color 140ms ease;
 }
 
 .edit-link:hover {
-  color: var(--signal-bright);
+  color: var(--accent-bright);
 }
 
 .docs-pager {
@@ -350,8 +365,8 @@ pagefind-searchbox.docs-search mark {
 }
 
 .pager-link:hover {
-  border-color: rgba(230, 159, 55, 0.35);
-  background: color-mix(in srgb, var(--ink-1) 85%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 85%, transparent);
 }
 
 .pager-next {
@@ -363,11 +378,11 @@ pagefind-searchbox.docs-search mark {
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--paper-2);
+  color: var(--text-2);
 }
 
 .pager-title {
-  color: var(--signal-bright);
+  color: var(--accent-bright);
   font-size: 0.95rem;
 }
 
@@ -379,20 +394,20 @@ pagefind-searchbox.docs-search mark {
 
 .docs-404 h1 {
   margin: 1.1rem 0 0;
-  font-family: var(--font-display);
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: 680;
   font-size: clamp(2.6rem, 6vw, 4.4rem);
-  line-height: 1.05;
+  line-height: 1.04;
+  letter-spacing: -0.038em;
 }
 
 .docs-404 .accent {
-  font-style: italic;
-  color: var(--signal);
+  color: var(--accent);
 }
 
 .docs-404 .dek {
   margin-top: 1.2rem;
-  color: var(--paper-1);
+  color: var(--text-1);
 }
 
 .docs-404 .cta-row {
