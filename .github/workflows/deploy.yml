@@ -13,6 +13,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # A Noeta release dispatches `release-published` with `{ tag }`; docs syncs its content from that tag.
+  repository_dispatch:
+    types: [release-published]
 
 concurrency:
   group: deploy
@@ -62,6 +65,37 @@ jobs:
 
       - name: Install Chromium
         run: pnpm exec playwright-core install --with-deps chromium
+
+      - name: Resolve latest Noeta release tag
+        # Resolve the latest published release tag and use it for BOTH:
+        #   - NOETA_VERSION: baked into the built HTML via SITE.version (the header's version pill).
+        #   - NOETA_DOCS_REF: the ref sync-docs fetches docs/ from, so /docs matches the released
+        #     toolchain instead of unreleased work on main.
+        # A release-published dispatch carries the tag in its payload, so prefer that and skip the
+        # API call. For push / manual runs, fall back to /releases/latest. GITHUB_TOKEN lifts the
+        # unauthenticated rate limit (60 → 5000 req/h).
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAYLOAD_TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          if [ -n "$PAYLOAD_TAG" ]; then
+            TAG="$PAYLOAD_TAG"
+            echo "Using tag from dispatch payload: $TAG"
+          else
+            TAG=$(curl -fsSL \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/noeta-lang/noeta/releases/latest \
+              | jq -r '.tag_name // empty' || true)
+            [ -n "$TAG" ] && echo "Using latest release tag from API: $TAG"
+          fi
+          if [ -n "$TAG" ]; then
+            echo "NOETA_VERSION=$TAG" >> "$GITHUB_ENV"
+            echo "NOETA_DOCS_REF=$TAG" >> "$GITHUB_ENV"
+          else
+            # No release yet: SITE.version stays null and sync-docs falls back to main.
+            echo "No release tag found; building from main."
+          fi
 
       - name: Build (docs sync + site + pagefind + OG image)
         run: pnpm run build
