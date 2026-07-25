@@ -22,11 +22,12 @@ const prev = idx > 0 ? links[idx - 1] : null;
 const next = idx >= 0 && idx < links.length - 1 ? links[idx + 1] : null;
 
 const path = slug === "home" ? "/" : `/${slug}`;
-// Para-library pages mirror a repo's README; everything else lives in the
-// noeta repo's docs/.
+// Para-library pages mirror a repo's README (or, for the overview, a template
+// in this repo — its manifest entry carries the edit URL outright); everything
+// else lives in the noeta repo's docs/.
 const para = getParaLib(slug);
 const editUrl = para
-  ? `https://github.com/${para.org}/${para.repo}/edit/${para.branch}/README.md`
+  ? (para.edit ?? `https://github.com/${para.org}/${para.repo}/edit/${para.branch}/README.md`)
   : `https://github.com/${SITE.docsRepo}/edit/${SITE.docsBranch}/docs/${sourcePath}.md`;
 
 const info = listDocs().find((d) => d.slug === slug);

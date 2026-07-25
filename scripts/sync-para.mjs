@@ -31,6 +31,12 @@ const REGISTRY = "https://registry.noeta.dev";
 const docsDir = resolve(process.cwd(), "content", "docs");
 const MARKER = "<!-- para-libraries: appended by scripts/sync-para.mjs -->";
 
+/** The hand-written overview page (this repo's content-src/), synced in with a
+ *  generated library index replacing its <!-- para-index --> marker. */
+const OVERVIEW_SRC = resolve(process.cwd(), "content-src", "Para-Libraries.md");
+const OVERVIEW_EDIT_URL = "https://github.com/noeta-lang/noeta-docs/edit/main/content-src/Para-Libraries.md";
+const INDEX_MARKER = "<!-- para-index -->";
+
 /** `name = "para/cli"` from a noeta.toml, or a derivation from the repo name
  *  (`para-aether-db` → `para/aether_db`) when the manifest isn't readable. */
 function packageName(repo, toml) {
@@ -83,6 +89,38 @@ function absolutizeReadmeLinks(md, repo, branch) {
     if (new RegExp(`^\\s{0,3}${fenceChar}{3,}\\s*$`).test(line)) inFence = false;
   }
   return out.join("\n");
+}
+
+/** The first sentence of the README's intro paragraph (after the H1), as
+ *  plain text — the one-liner for the overview page's library index. */
+function introSentence(readme) {
+  const lines = readme.split("\n");
+  let i = lines.findIndex((l) => /^#\s/.test(l)) + 1;
+  while (i < lines.length && lines[i].trim() === "") i++;
+  const para = [];
+  while (i < lines.length && lines[i].trim() !== "") para.push(lines[i++].trim());
+  const plain = para
+    .join(" ")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+  const cut = plain.indexOf(". ");
+  const sentence = cut >= 0 ? plain.slice(0, cut + 1) : plain;
+  return sentence.length > 180 ? sentence.slice(0, 177).trimEnd() + "…" : sentence;
+}
+
+/** The overview page: the content-src template with the generated index table
+ *  in place of its marker. Its links stay relative — the site's own cross-link
+ *  rewriter resolves them, exactly as for the synced language docs. */
+function buildOverviewPage(libs) {
+  const template = readFileSync(OVERVIEW_SRC, "utf-8");
+  const table = [
+    "| Library | What it is |",
+    "|---|---|",
+    ...libs.map((l) => `| [\`${l.pkg}\`](${l.repo}) | ${introSentence(l.readme)} |`),
+  ].join("\n");
+  return template.replace(INDEX_MARKER, table);
 }
 
 /** The README with the repo/registry note injected after the title H1. */
@@ -157,7 +195,13 @@ function appendSidebarSection(libs) {
   let content = readFileSync(sidebarPath, "utf-8");
   const at = content.indexOf(MARKER);
   if (at >= 0) content = content.slice(0, at);
-  const section = [MARKER, "", "**Para libraries**", ...libs.map((l) => `- [${l.pkg}](${l.repo})`)].join("\n");
+  const section = [
+    MARKER,
+    "",
+    "**Para libraries**",
+    "- [Overview](Para-Libraries)",
+    ...libs.map((l) => `- [${l.pkg}](${l.repo})`),
+  ].join("\n");
   writeFileSync(sidebarPath, content.trimEnd() + "\n\n" + section + "\n");
 }
 
@@ -173,9 +217,11 @@ export async function syncParaLibs() {
   for (const lib of libs) {
     writeFileSync(join(docsDir, `${lib.repo}.md`), buildPage(lib));
   }
+  writeFileSync(join(docsDir, "Para-Libraries.md"), buildOverviewPage(libs));
   appendSidebarSection(libs);
 
   const manifest = libs.map(({ repo, pkg, branch }) => ({ org: ORG, repo, pkg, branch, slug: toDocSlug(repo) }));
+  manifest.push({ slug: "para-libraries", edit: OVERVIEW_EDIT_URL });
   writeFileSync(join(docsDir, "_para-libs.json"), JSON.stringify(manifest, null, 2) + "\n");
 
   console.log(
