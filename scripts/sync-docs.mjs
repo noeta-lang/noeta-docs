@@ -10,6 +10,10 @@
  *      without the language checkout. No token needed for a public repo, and
  *      `--filter=blob:none --sparse` fetches only the docs/ blobs.
  *
+ * After the docs sync, sync-para.mjs adds one page per para-* library (from
+ * their READMEs) plus a "Para libraries" sidebar section — see that file for
+ * its sources and env knobs.
+ *
  * Env:
  *   NOETA_DOCS_LOCAL   — path to a local docs/ dir (default: ../lang/docs
  *                        relative to this repo, used when it exists)
@@ -23,6 +27,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { cp, readdir, rename, rm } from "node:fs/promises";
 import { resolve } from "node:path";
+import { syncParaLibs } from "./sync-para.mjs";
 
 const repoRoot = process.cwd();
 const docsDir = resolve(repoRoot, "content", "docs");
@@ -92,4 +97,12 @@ try {
     console.error(`[sync-docs] FATAL: ${err.message}`);
     process.exit(1);
   }
+}
+
+// The para library pages are additive — a failure loses those pages but must
+// not take the docs build down with it.
+try {
+  await syncParaLibs();
+} catch (err) {
+  console.warn(`[sync-para] WARNING: ${err.message}; building without para library pages`);
 }

@@ -42,3 +42,16 @@ export function getSidebar() {
 export function getSidebarLinks() {
   return getSidebar().filter((e) => e.kind === "link");
 }
+
+// The para-library page manifest written by scripts/sync-para.mjs: docs whose
+// source is a library repo's README rather than the noeta docs/ dir. Returns
+// { org, repo, pkg, branch, slug } for a para page, null for regular docs.
+export function getParaLib(slug) {
+  const manifestPath = resolve(docsDir, "_para-libs.json");
+  if (!existsSync(manifestPath)) return null;
+  try {
+    return JSON.parse(readFileSync(manifestPath, "utf-8")).find((l) => l.slug === slug) ?? null;
+  } catch {
+    return null;
+  }
+}

@@ -4,7 +4,7 @@
  * paging. Slugs live at the site root: Home at /, others at /<slug>. */
 import Search from "astro-pagefind/components/Search.astro";
 import Base from "../layouts/Base.astro";
-import { getSidebar, getSidebarLinks } from "../lib/docs.mjs";
+import { getSidebar, getSidebarLinks, getParaLib } from "../lib/docs.mjs";
 import { listDocs } from "../../scripts/docs-meta.mjs";
 import { SITE } from "../lib/site";
 
@@ -22,7 +22,12 @@ const prev = idx > 0 ? links[idx - 1] : null;
 const next = idx >= 0 && idx < links.length - 1 ? links[idx + 1] : null;
 
 const path = slug === "home" ? "/" : `/${slug}`;
-const editUrl = `https://github.com/${SITE.docsRepo}/edit/${SITE.docsBranch}/docs/${sourcePath}.md`;
+// Para-library pages mirror a repo's README; everything else lives in the
+// noeta repo's docs/.
+const para = getParaLib(slug);
+const editUrl = para
+  ? `https://github.com/${para.org}/${para.repo}/edit/${para.branch}/README.md`
+  : `https://github.com/${SITE.docsRepo}/edit/${SITE.docsBranch}/docs/${sourcePath}.md`;
 
 const info = listDocs().find((d) => d.slug === slug);
 const description = info?.description || undefined;
