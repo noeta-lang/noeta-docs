@@ -72,8 +72,9 @@ jobs:
         #   - NOETA_DOCS_REF: the ref sync-docs fetches docs/ from, so /docs matches the released
         #     toolchain instead of unreleased work on main.
         # A release-published dispatch carries the tag in its payload, so prefer that and skip the
-        # API call. For push / manual runs, fall back to /releases/latest. GITHUB_TOKEN lifts the
-        # unauthenticated rate limit (60 → 5000 req/h).
+        # API calls. For push / manual runs, try /releases/latest (excludes prereleases and drafts),
+        # then fall back to the newest non-prerelease v-tag — a tag pushed without a GitHub release
+        # still counts. GITHUB_TOKEN lifts the unauthenticated rate limit (60 → 5000 req/h).
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PAYLOAD_TAG: ${{ github.event.client_payload.tag }}
@@ -88,6 +89,14 @@ jobs:
               https://api.github.com/repos/noeta-lang/noeta/releases/latest \
               | jq -r '.tag_name // empty' || true)
             [ -n "$TAG" ] && echo "Using latest release tag from API: $TAG"
+          fi
+          if [ -z "$TAG" ]; then
+            TAG=$(curl -fsSL \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/noeta-lang/noeta/tags?per_page=100" \
+              | jq -r '.[].name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1 || true)
+            [ -n "$TAG" ] && echo "Using latest non-prerelease tag: $TAG"
           fi
           if [ -n "$TAG" ]; then
             echo "NOETA_VERSION=$TAG" >> "$GITHUB_ENV"

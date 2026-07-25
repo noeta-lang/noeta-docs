@@ -1,29 +1,6 @@
 /* docs.noeta.dev — documentation layout. Tokens, chrome, and shared components
  * come from @noeta/theme (imported in the layout before this file). */
 
-/* --- header: wordmark + version pill --------------------------------------------------- */
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.version-pill {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-2);
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  padding: 0.05rem 0.5rem;
-  transition: color 140ms ease, border-color 140ms ease;
-}
-
-.version-pill:hover {
-  color: var(--accent-bright);
-  border-color: var(--accent);
-}
-
 /* --- shell: sidebar + article ---------------------------------------------------------- */
 
 .docs-grid {
