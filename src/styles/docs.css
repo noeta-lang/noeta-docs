@@ -56,6 +56,19 @@
   }
 }
 
+/* Once the tree has been moved into the chrome drawer the drawer itself is the
+ * collapse, so the summary would just be a toggle that closes the menu you are
+ * reading. Links get a phone-sized tap target while they are in there. */
+.drawer-body .docs-nav summary {
+  display: none;
+}
+
+.drawer-body .docs-nav a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
 .docs-nav ul {
   list-style: none;
   margin: 0.6rem 0 0;

@@ -5,6 +5,7 @@ import "@noeta/theme/fonts.css";
 import "@noeta/theme/theme.css";
 import "../styles/docs.css";
 import BaseHead from "../components/BaseHead.astro";
+import { renderHeader, renderFooter, DRAWER_SCRIPT } from "@noeta/theme/chrome";
 import { SITE } from "../lib/site";
 
 interface Props {
@@ -24,44 +25,9 @@ const { title, description, path, article } = Astro.props;
   </head>
   <body>
     <div class="field" aria-hidden="true"></div>
-    <header class="site-head">
-      <div class="wrap">
-        <div class="brand">
-          <a class="wordmark" href="/">noeta<span class="tld">.dev/docs</span></a>
-          {
-            SITE.version && (
-              <a
-                class="version-pill"
-                href={`${SITE.links.github}/releases/tag/${SITE.version}`}
-                title={`Noeta ${SITE.version}`}
-              >
-                {SITE.version}
-              </a>
-            )
-          }
-        </div>
-        <nav class="site-nav" aria-label="Site">
-          <a href={SITE.links.home}>noeta.dev</a>
-          <a href={SITE.links.registry}>registry</a>
-          <a href={SITE.links.playground}>playground</a>
-          <a href={SITE.links.github}>github</a>
-        </nav>
-      </div>
-    </header>
+    <Fragment set:html={renderHeader({ site: "docs", version: SITE.version })} />
     <slot />
-    <footer class="site-foot">
-      <div class="wrap">
-        <span class="tagline">AI-native, <em>human-first.</em></span>
-        <nav class="foot-nav" aria-label="Footer">
-          <a href={SITE.links.home}>noeta.dev</a>
-          <a href={SITE.links.registry}>registry</a>
-          <a href={SITE.links.playground}>playground</a>
-          <a href={SITE.links.github}>github</a>
-        </nav>
-        <p class="foot-meta">
-          Noeta is pre-alpha and built in the open — anything may change without notice.
-        </p>
-      </div>
-    </footer>
+    <Fragment set:html={renderFooter({ site: "docs" })} />
+    <script is:inline set:html={DRAWER_SCRIPT} />
   </body>
 </html>
