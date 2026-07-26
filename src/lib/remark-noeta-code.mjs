@@ -19,10 +19,16 @@
 // prefers-color-scheme, so light/dark keeps working with a single theme.
 
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createHighlighter } from "shiki";
 
+// Resolved from the project root, not import.meta.url: og.astro imports this
+// module too, and prerendered pages are bundled into dist/.prerender/chunks/,
+// where a module-relative path would point at dist/syntaxes/. Astro always
+// runs with cwd = project root (both for the config's remark pass and the
+// prerender), so a cwd-based path works in every context.
 const grammar = (file) =>
-  JSON.parse(readFileSync(new URL(`../../syntaxes/${file}`, import.meta.url), "utf8"));
+  JSON.parse(readFileSync(resolve(process.cwd(), "syntaxes", file), "utf8"));
 
 /** Languages the tier-languages injection grammar embeds (by scope name). */
 const TIER_LANGS = [
@@ -91,6 +97,22 @@ function getHighlighter() {
     langAlias: { noe: "noeta" },
   });
   return highlighterPromise;
+}
+
+/**
+ * Highlight Noeta source into inner HTML (token spans with inline
+ * `var(--syn-*)` colors, one `span.line` per source line) for embedding in a
+ * caller-owned `<pre><code>` — used by og.astro, whose card brings its own
+ * code-window chrome.
+ * @param {string} code
+ * @returns {Promise<string>} HTML
+ */
+export async function highlightNoetaInline(code) {
+  const highlighter = await getHighlighter();
+  const html = highlighter.codeToHtml(code, { lang: "noeta", theme: "noeta-ink-signal" });
+  const match = /^<pre[^>]*><code[^>]*>([\s\S]*)<\/code><\/pre>\s*$/.exec(html);
+  if (!match) throw new Error("unexpected shiki output shape");
+  return match[1];
 }
 
 function collect(node, found) {

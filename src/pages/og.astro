@@ -7,7 +7,7 @@
  * color-scheme. */
 import "@noeta/theme/fonts.css";
 import "@noeta/theme/theme.css";
-import { highlightNoeta } from "@noeta/theme/highlight";
+import { highlightNoetaInline } from "../lib/remark-noeta-code.mjs";
 
 const SNIPPET = `use std.reactive.{signal, computed}
 
@@ -16,7 +16,7 @@ doubled = computed(fn() => count.get() * 2)
 
 count.set(5)
 echo "doubled is \${doubled.get()}"`;
-const code = highlightNoeta(SNIPPET);
+const code = await highlightNoetaInline(SNIPPET);
 ---
 
 <!doctype html>
