@@ -11,9 +11,11 @@
   padding-block: 2.5rem 4rem;
 }
 
+/* minmax(0, 1fr), not 1fr: a bare 1fr keeps min-width:auto, so the column
+ * floors at its widest item's min-content instead of the viewport. */
 @media (max-width: 56rem) {
   .docs-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding-block: 1.5rem 3rem;
   }
 }
@@ -293,6 +295,15 @@ pagefind-searchbox.docs-search mark {
   color: var(--accent-bright);
   border-bottom: 1px dotted color-mix(in srgb, var(--accent) 45%, transparent);
   transition: border-color 140ms ease;
+}
+
+/* Inline code and bare URLs in prose. Reference pages carry long unbroken
+ * identifiers (`datetime.seconds/minutes/hours/...`) that otherwise form one
+ * rigid box and push the article past a phone viewport. Fenced blocks are
+ * excluded — they scroll inside their own frame. */
+.docs-prose :not(pre) > code,
+.docs-prose a {
+  overflow-wrap: anywhere;
 }
 
 .docs-prose a:hover {
