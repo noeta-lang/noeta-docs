@@ -98,9 +98,12 @@ const formatDate = (iso: string) => iso.slice(0, 10);
           });
         }
       </script>
-      <!-- Ships `open` so desktop and no-JS readers always get the full tree; the
-           script below collapses it under the 56rem breakpoint. -->
-      <details class="docs-nav" open>
+      <!-- Ships `open` so desktop and no-JS readers always get the full tree. Two
+           things narrow it: the script below collapses it to its <summary> under
+           56rem, and under 38rem the shared chrome drawer moves it in wholesale
+           (data-drawer-content) so the site links and the contents tree are one
+           menu rather than two. -->
+      <details class="docs-nav" data-drawer-content open>
         <summary>Contents</summary>
         <nav aria-label="Documentation">
           <ul>
