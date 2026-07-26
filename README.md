@@ -16,8 +16,14 @@ pages at the site root and searchable via [Pagefind](https://pagefind.app).
 - `Home.md` is served at `/`; every other page at `/<slug>` (`_Sidebar.md` drives nav order
   and prev/next paging). Cross-links are rewritten at the mdast level so code blocks are
   never touched.
-- ```` ```noeta ```` fences are highlighted by the shared `@noeta/theme/highlight`
-  tokenizer; other languages go through shiki (vesper theme).
+- ```` ```noeta ```` fences are highlighted with the language repo's canonical TextMate
+  grammar: `scripts/sync-grammars.mjs` (predev/prebuild, same local-checkout/sparse-clone
+  sources as sync-docs) copies `noeta.tmLanguage.json` plus the tier-languages injection
+  grammar into the gitignored `syntaxes/`, and `remark-noeta-code.mjs` runs them through
+  shiki with a theme mapped onto the Ink & Signal `--syn-*` variables (so light/dark just
+  follow the site palette). The injection grammar colors embedded tier bodies —
+  `@sql { … }` as SQL, etc., with `${…}` holes back to Noeta. Other languages go through
+  Astro's built-in shiki (dual GitHub themes).
 - Search: `astro-pagefind` indexes the article bodies (`data-pagefind-body`) at build time;
   the searchbox is themed via `--pf-*` variables.
 - Agent-friendly mirrors: `/llms.txt` indexes the docs, and each page is served raw at

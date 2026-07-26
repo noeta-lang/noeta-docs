@@ -28,8 +28,10 @@ export default defineConfig({
     pagefind(),
   ],
   markdown: {
-    // ```noeta fences are handled by remarkNoetaCode (the shared @noeta/theme
-    // highlighter); shiki takes the other languages. Dual themes with
+    // ```noeta fences are handled by remarkNoetaCode — shiki over the canonical
+    // TextMate grammar (synced into syntaxes/ by scripts/sync-grammars.mjs),
+    // themed onto the Ink & Signal --syn-* variables; this built-in shiki pass
+    // takes the other languages. Dual themes with
     // defaultColor:false emit --shiki-light/--shiki-dark custom properties per
     // token, so code blocks follow the site's light/dark mode (wired up in
     // docs.css). Cool, neutral GitHub themes to match "Signal".

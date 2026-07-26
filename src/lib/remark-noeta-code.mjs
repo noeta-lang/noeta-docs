@@ -1,24 +1,130 @@
-// Remark plugin: renders ```noeta / ```noe fences with the shared @noeta/theme
-// highlighter instead of shiki (which has no Noeta grammar and would fall back
-// to unstyled plaintext with a build warning). Emitting a raw html node here
-// means shiki never sees these blocks; every other language stays on shiki.
+// Remark plugin: renders ```noeta / ```noe fences with the CANONICAL Noeta
+// TextMate grammar (synced into syntaxes/ by scripts/sync-grammars.mjs) through
+// shiki, instead of Astro's built-in shiki pass (which has no Noeta grammar and
+// would fall back to unstyled plaintext with a build warning). Emitting a raw
+// html node here means Astro's shiki never sees these blocks; every other
+// language stays on the built-in pass (github dual themes).
+//
+// Two grammars are registered:
+//   - noeta.tmLanguage.json          — the core grammar (source.noeta)
+//   - tier-languages.tmLanguage.json — the injection grammar (injectTo
+//     source.noeta) that colors embedded-language tier bodies: @sql{…} as SQL,
+//     @html{…} as HTML, …, with ${…} holes scoped back to source.noeta. The
+//     languages it injects are preloaded below so the includes resolve.
+//
+// Instead of a pre-baked color theme, the shiki theme maps TextMate scopes to
+// the Ink & Signal syntax variables (--syn-* from @noeta/theme), i.e. the same
+// palette the old tok-* highlighter used. Shiki passes `var(…)` foregrounds
+// straight through to inline styles, and the variables flip with
+// prefers-color-scheme, so light/dark keeps working with a single theme.
 
-import { highlightNoeta } from "@noeta/theme/highlight";
+import { readFileSync } from "node:fs";
+import { createHighlighter } from "shiki";
 
-function walk(node) {
+const grammar = (file) =>
+  JSON.parse(readFileSync(new URL(`../../syntaxes/${file}`, import.meta.url), "utf8"));
+
+/** Languages the tier-languages injection grammar embeds (by scope name). */
+const TIER_LANGS = [
+  "sql",
+  "html",
+  "css",
+  "json",
+  "yaml",
+  "xml",
+  "graphql",
+  "markdown",
+  "javascript",
+  "python",
+  "shellscript",
+  "toml",
+  "sparql",
+];
+
+/** Ink & Signal as a shiki theme: scope → the site's --syn-* CSS variables. */
+const inkSignal = {
+  name: "noeta-ink-signal",
+  type: "dark",
+  colors: {
+    "editor.foreground": "var(--text-0)",
+    "editor.background": "transparent",
+  },
+  settings: [
+    { settings: { foreground: "var(--text-0)", background: "transparent" } },
+    { scope: "comment", settings: { foreground: "var(--syn-comment)", fontStyle: "italic" } },
+    { scope: ["string", "punctuation.definition.string", "constant.character.escape"], settings: { foreground: "var(--syn-string)" } },
+    { scope: "constant.numeric", settings: { foreground: "var(--syn-number)" } },
+    { scope: ["keyword", "storage", "constant.language", "variable.language"], settings: { foreground: "var(--syn-keyword)" } },
+    // Symbolic operators stay plain (as the site always rendered them);
+    // word operators (`is`, `and`, …) read as keywords.
+    { scope: "keyword.operator", settings: { foreground: "var(--text-0)" } },
+    { scope: "keyword.operator.word", settings: { foreground: "var(--syn-keyword)" } },
+    { scope: ["entity.name.type", "support.type", "support.class"], settings: { foreground: "var(--syn-type)" } },
+    { scope: ["entity.name.function", "support.function"], settings: { foreground: "var(--syn-fn)" } },
+    // @directives and @tier{…} openers — the tok-tier accent.
+    { scope: "entity.name.function.decorator", settings: { foreground: "var(--accent-2-bright)" } },
+    { scope: "entity.name.tag", settings: { foreground: "var(--syn-tag)" } },
+    { scope: "entity.other.attribute-name", settings: { foreground: "var(--syn-string)" } },
+    // ${…} interpolation/hole delimiters — the tok-hole accent.
+    { scope: ["punctuation.definition.template-expression", "punctuation.section.embedded"], settings: { foreground: "var(--syn-hole)" } },
+    // Markdown bodies inside @doc/text tiers.
+    { scope: "markup.heading", settings: { foreground: "var(--syn-keyword)", fontStyle: "bold" } },
+    { scope: "markup.bold", settings: { fontStyle: "bold" } },
+    { scope: "markup.italic", settings: { fontStyle: "italic" } },
+    { scope: "markup.inline.raw", settings: { foreground: "var(--syn-string)" } },
+  ],
+};
+
+let highlighterPromise;
+function getHighlighter() {
+  highlighterPromise ??= createHighlighter({
+    themes: [inkSignal],
+    langs: [
+      ...TIER_LANGS,
+      { ...grammar("noeta.tmLanguage.json"), name: "noeta" },
+      {
+        ...grammar("tier-languages.tmLanguage.json"),
+        name: "noeta-tier-languages",
+        injectTo: ["source.noeta"],
+      },
+    ],
+    langAlias: { noe: "noeta" },
+  });
+  return highlighterPromise;
+}
+
+function collect(node, found) {
   if (!node || !Array.isArray(node.children)) return;
-  node.children = node.children.map((child) => {
+  node.children.forEach((child, index) => {
     if (child.type === "code" && (child.lang === "noeta" || child.lang === "noe")) {
-      return {
-        type: "html",
-        value: `<pre class="noeta-code"><code>${highlightNoeta(child.value)}</code></pre>`,
-      };
+      found.push({ parent: node, index });
+    } else {
+      collect(child, found);
     }
-    walk(child);
-    return child;
   });
 }
 
 export default function remarkNoetaCode() {
-  return (tree) => walk(tree);
+  return async (tree) => {
+    const found = [];
+    collect(tree, found);
+    if (found.length === 0) return;
+    const highlighter = await getHighlighter();
+    for (const { parent, index } of found) {
+      parent.children[index] = {
+        type: "html",
+        value: highlighter.codeToHtml(parent.children[index].value, {
+          lang: "noeta",
+          theme: "noeta-ink-signal",
+          transformers: [
+            {
+              pre(node) {
+                this.addClassToHast(node, "noeta-code");
+              },
+            },
+          ],
+        }),
+      };
+    }
+  };
 }

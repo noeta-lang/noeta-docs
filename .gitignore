@@ -3,6 +3,7 @@ node_modules/
 dist/
 .astro/
 content/
+syntaxes/
 *.log
 .dev.vars
 .DS_Store

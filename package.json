@@ -7,8 +7,9 @@
   "packageManager": "pnpm@11.13.1",
   "scripts": {
     "sync-docs": "node scripts/sync-docs.mjs",
-    "predev": "node scripts/sync-docs.mjs",
-    "prebuild": "node scripts/sync-docs.mjs",
+    "sync-grammars": "node scripts/sync-grammars.mjs",
+    "predev": "node scripts/sync-docs.mjs && node scripts/sync-grammars.mjs",
+    "prebuild": "node scripts/sync-docs.mjs && node scripts/sync-grammars.mjs",
     "dev": "astro dev",
     "build": "astro build && node scripts/build-og-image.mjs",
     "preview": "pnpm run build && wrangler dev",
@@ -26,6 +27,7 @@
     "astro-pagefind": "^2.0.1",
     "playwright-core": "^1.61.1",
     "rehype-slug": "^6.0.0",
+    "shiki": "^4.3.1",
     "typescript": "^5.9.3",
     "wrangler": "~4.112.0"
   }

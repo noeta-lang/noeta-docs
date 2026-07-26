@@ -369,9 +369,10 @@ pagefind-searchbox.docs-search mark {
   margin: 2.4rem 0;
 }
 
-/* code blocks: shiki (.astro-code, vesper) and the Noeta highlighter
- * (.noeta-code) share one surface. Shiki inlines vesper's background; override
- * it so every block sits on the theme's ink. */
+/* code blocks: Astro's shiki pass (.astro-code) and the Noeta grammar pass
+ * (.noeta-code, shiki over the real TextMate grammar with --syn-* foregrounds)
+ * share one surface. Shiki inlines a theme background; override it so every
+ * block sits on the theme's ink. */
 .docs-prose pre {
   margin: 1.2rem 0 1.4rem;
   padding: 1rem 1.15rem;
