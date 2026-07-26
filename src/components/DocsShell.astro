@@ -98,6 +98,8 @@ const formatDate = (iso: string) => iso.slice(0, 10);
           });
         }
       </script>
+      <!-- Ships `open` so desktop and no-JS readers always get the full tree; the
+           script below collapses it under the 56rem breakpoint. -->
       <details class="docs-nav" open>
         <summary>Contents</summary>
         <nav aria-label="Documentation">
@@ -118,6 +120,24 @@ const formatDate = (iso: string) => iso.slice(0, 10);
           </ul>
         </nav>
       </details>
+      <script is:inline>
+        // Below 56rem the contents tree is ~2000px tall and pushes the article
+        // title roughly two and a half screens down, so collapse it there; the
+        // <summary> toggle only renders below that breakpoint (docs.css), which
+        // is also why it has to stay open above it. Inline rather than a bundled
+        // module so it runs before first paint — deferred, the expanded tree
+        // flashes in and the page jumps.
+        (() => {
+          const nav = document.querySelector("details.docs-nav");
+          if (!nav) return;
+          const compact = window.matchMedia("(max-width: 56rem)");
+          const sync = () => {
+            nav.open = !compact.matches;
+          };
+          sync();
+          compact.addEventListener("change", sync);
+        })();
+      </script>
     </aside>
 
     <article class="docs-article" data-pagefind-body>
