@@ -26,7 +26,7 @@ para = [
 native = ["para/db"]
 ```
 
-The scope key is the import root: `para/aether` addresses as `para.aether`, `para/db` as `para.db` — `use para.aether.{App}`, `use para.db.{Db}`.
+The scope key is the import root: `para/aether` addresses as `para.aether`, `para/db` as `para.db` — `use para.aether.{App}`, `use para.db.{Db}`. If you have never added a dependency before, the [Package Quickstart](Quickstart-Packages) walks the whole flow in five commands.
 
 ## How these pages work
 
