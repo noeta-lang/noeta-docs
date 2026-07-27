@@ -210,6 +210,10 @@ pagefind-searchbox.docs-search {
   --pf-input-height: 2.4rem;
   --pf-skeleton: var(--surface-2);
   --pf-skeleton-shine: var(--surface-3);
+  /* Excerpt <mark> color. Pagefind's dark set is gated on [data-pf-theme="dark"], which this
+   * integration doesn't use, so without this the light default (#1a1a1a) applies — near-black
+   * highlights on a dark panel. */
+  --pf-mark: var(--accent-bright);
   --pf-shadow-sm: 0 8px 30px -12px rgba(0, 0, 0, 0.8);
   --pf-shadow-md: 0 14px 44px -16px rgba(0, 0, 0, 0.85);
   --pf-shadow-lg: 0 20px 60px -20px rgba(0, 0, 0, 0.9);
@@ -245,7 +249,15 @@ pagefind-searchbox.docs-search input {
   border-bottom-left-radius: var(--pf-border-radius);
 }
 
-pagefind-searchbox.docs-search mark {
+/* The excerpt-highlight pill — accent-on-dim, matching the active sidebar link. Pagefind's own
+   mark rule sets `background: transparent; color: var(--pf-mark)` behind the same (3,1,1)
+   :is(*,#\#) hack as the dropdown rules above, so the previous plain
+   `pagefind-searchbox.docs-search mark` selector at (0,1,2) silently lost — near-black
+   highlights on the dark panel. This scores (3,2,1); the `--pf-mark` override in the var block
+   above keeps the color right even where pagefind's own rule still applies. */
+:is(*, #\#):is(*, #\#):is(*, #\#) .docs-search-dialog .pf-searchbox-result-excerpt mark,
+:is(*, #\#):is(*, #\#):is(*, #\#) .docs-search-dialog .pf-heading-excerpt mark,
+:is(*, #\#):is(*, #\#):is(*, #\#) .docs-search-dialog .pf-result-excerpt mark {
   background: var(--accent-dim);
   color: var(--accent-bright);
   border-radius: 3px;
