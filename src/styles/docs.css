@@ -39,7 +39,7 @@
   }
 }
 
-.docs-nav summary {
+.docs-nav > summary {
   display: none;
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -51,7 +51,7 @@
 }
 
 @media (max-width: 56rem) {
-  .docs-nav summary {
+  .docs-nav > summary {
     display: list-item;
   }
 }
@@ -59,7 +59,7 @@
 /* Once the tree has been moved into the chrome drawer the drawer itself is the
  * collapse, so the summary would just be a toggle that closes the menu you are
  * reading. Links get a phone-sized tap target while they are in there. */
-.drawer-body .docs-nav summary {
+.drawer-body .docs-nav > summary {
   display: none;
 }
 
@@ -117,6 +117,50 @@
   background: var(--accent-dim);
   border-left-color: var(--accent);
   border-radius: 0 6px 6px 0;
+}
+
+/* --- collapsible groups (a link whose sidebar entry has indented children) ---------------- */
+
+.docs-nav .docs-group summary {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.docs-nav .docs-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-nav .docs-group summary a {
+  flex: 1;
+}
+
+/* The toggle affordance: a chevron that rotates open. It sits outside the
+ * link, so clicking it collapses/expands without navigating. */
+.docs-nav .docs-group summary::after {
+  content: "›";
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--text-2);
+  padding: 0.28rem 0.6rem;
+  transition: transform 140ms ease, color 140ms ease;
+}
+
+.docs-nav .docs-group summary:hover::after {
+  color: var(--text-0);
+}
+
+.docs-nav .docs-group[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.docs-nav .docs-group > ul {
+  margin: 0.15rem 0 0.4rem 0.85rem;
+  padding-left: 0.35rem;
+  border-left: 1px solid var(--line);
 }
 
 /* --- search: input-styled trigger + modal dialog -------------------------------------------- */

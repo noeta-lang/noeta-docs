@@ -15,8 +15,11 @@ const docsDir = resolve(process.cwd(), "content", "docs");
 export { pathForSlug };
 
 // Structured sidebar for rendering: sections + links (with resolved paths), in
-// _Sidebar.md order; links pointing at docs that don't exist are dropped.
-// Falls back to a flat, title-sorted list when _Sidebar.md is absent.
+// _Sidebar.md order; links pointing at docs that don't exist are dropped. An
+// indented sidebar item (depth 1) becomes a child of the nearest preceding
+// top-level link — its collapsible group. Every link entry carries `children`
+// (usually empty). Falls back to a flat, title-sorted list when _Sidebar.md is
+// absent.
 export function getSidebar() {
   const docs = listDocs();
   const haveSlug = new Set(docs.map((d) => d.slug));
@@ -25,22 +28,39 @@ export function getSidebar() {
   if (existsSync(sidebarPath)) {
     const items = parseSidebar(readFileSync(sidebarPath, "utf-8"));
     const out = [];
+    let lastLink = null;
     for (const item of items) {
       if (item.kind === "section") {
         out.push({ kind: "section", title: item.title });
+        lastLink = null;
       } else if (item.kind === "link" && haveSlug.has(item.slug)) {
-        out.push({ kind: "link", title: item.title, slug: item.slug, path: pathForSlug(item.slug) });
+        const entry = {
+          kind: "link",
+          title: item.title,
+          slug: item.slug,
+          path: pathForSlug(item.slug),
+          children: [],
+        };
+        if (item.depth > 0 && lastLink) {
+          lastLink.children.push(entry);
+        } else {
+          out.push(entry);
+          lastLink = entry;
+        }
       }
     }
     return out;
   }
 
-  return docs.map((d) => ({ kind: "link", title: d.title, slug: d.slug, path: pathForSlug(d.slug) }));
+  return docs.map((d) => ({ kind: "link", title: d.title, slug: d.slug, path: pathForSlug(d.slug), children: [] }));
 }
 
-// Ordered list of just the sidebar link entries — used for prev/next paging.
+// Ordered list of just the sidebar link entries, groups flattened in reading
+// order (parent, then its children) — used for prev/next paging.
 export function getSidebarLinks() {
-  return getSidebar().filter((e) => e.kind === "link");
+  return getSidebar()
+    .filter((e) => e.kind === "link")
+    .flatMap((e) => [e, ...e.children]);
 }
 
 // The para-library page manifest written by scripts/sync-para.mjs: docs whose

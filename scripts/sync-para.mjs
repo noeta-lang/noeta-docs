@@ -195,12 +195,14 @@ function appendSidebarSection(libs) {
   let content = readFileSync(sidebarPath, "utf-8");
   const at = content.indexOf(MARKER);
   if (at >= 0) content = content.slice(0, at);
+  // The libraries nest under the overview link (indent = sidebar child), so
+  // the section collapses to one row unless the reader is inside it.
   const section = [
     MARKER,
     "",
     "**Para libraries**",
     "- [Overview](Para-Libraries)",
-    ...libs.map((l) => `- [${l.pkg}](${l.repo})`),
+    ...libs.map((l) => `  - [${l.pkg}](${l.repo})`),
   ].join("\n");
   writeFileSync(sidebarPath, content.trimEnd() + "\n\n" + section + "\n");
 }

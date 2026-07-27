@@ -114,12 +114,14 @@ function appendSidebarSection(families) {
   let content = readFileSync(sidebarPath, "utf-8");
   const at = content.indexOf(MARKER);
   if (at >= 0) content = content.slice(0, at);
+  // The modules nest under the overview link (indent = sidebar child), so the
+  // whole reference collapses to one row unless the reader is inside it.
   const section = [
     MARKER,
     "",
     "**Standard library**",
     "- [Overview](Std)",
-    ...[...families.keys()].map((f) => `- [std.${f}](std-${f})`),
+    ...[...families.keys()].map((f) => `  - [std.${f}](std-${f})`),
   ].join("\n");
   writeFileSync(sidebarPath, content.trimEnd() + "\n\n" + section + "\n");
 }

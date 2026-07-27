@@ -113,6 +113,33 @@ const formatDate = (iso: string) => iso.slice(0, 10);
               sidebar.map((entry) =>
                 entry.kind === "section" ? (
                   <li class="docs-section-label">{entry.title}</li>
+                ) : entry.children.length > 0 ? (
+                  <li>
+                    {/* A collapsible group: the parent link doubles as the summary row.
+                        Open only when the reader is inside the group — collapsed groups
+                        keep the long generated sections to a single row. Clicking the
+                        link navigates (the toggle is moot mid-navigation); the chevron
+                        area toggles without leaving the page. */}
+                    <details
+                      class="docs-group"
+                      open={entry.slug === slug || entry.children.some((c) => c.slug === slug)}
+                    >
+                      <summary>
+                        <a href={entry.path} class={entry.slug === slug ? "active" : undefined}>
+                          {entry.title}
+                        </a>
+                      </summary>
+                      <ul>
+                        {entry.children.map((child) => (
+                          <li>
+                            <a href={child.path} class={child.slug === slug ? "active" : undefined}>
+                              {child.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  </li>
                 ) : (
                   <li>
                     <a href={entry.path} class={entry.slug === slug ? "active" : undefined}>
