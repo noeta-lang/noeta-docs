@@ -1,4 +1,7 @@
 node_modules/
+# Claude Code local state
+.claude/worktrees/
+.claude/settings.local.json
 .wrangler/
 dist/
 .astro/

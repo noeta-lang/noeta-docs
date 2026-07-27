@@ -19,7 +19,12 @@ const { title, description, path, article } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<!-- data-layout="wide" takes the theme's --max from the 72rem reading width to
+     84rem, which is what makes room for the third column (nav · article · page
+     contents). It goes on <html>, not on the page body, so the shared header and
+     footer — .wrap elements the theme renders — widen with it and everything
+     stays on one left edge. -->
+<html lang="en" data-layout="wide">
   <head>
     <BaseHead title={title} description={description} path={path} article={article} />
   </head>

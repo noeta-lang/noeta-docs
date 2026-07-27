@@ -31,6 +31,28 @@ pages at the site root and searchable via [Pagefind](https://pagefind.app).
 - SEO: canonical + OG/Twitter meta, TechArticle JSON-LD per doc, sitemap, robots.txt, and a
   Playwright-rendered OG card (`/og` → `dist/images/og-image.png`, then deleted).
 
+## Layout
+
+Three columns: the `_Sidebar.md` nav, the article, and an "On this page" rail built from the
+page's own h2/h3 headings with a scroll-spy marking the section being read. The rail needs
+room, so this site (alone among the four) opts into the theme's wide page width —
+`data-layout="wide"` on `<html>`, which takes `--max` from 72rem to 84rem and widens the
+shared header and footer with it. Below the theme's `--bp-rail` (78rem) the rail folds into a
+collapsed disclosure above the article, styled to match the sidebar's own "Contents" toggle;
+below 56rem everything stacks; below 38rem the nav tree moves into the shared chrome drawer.
+
+## Gates
+
+```sh
+pnpm run check:links     # dead internal links + #anchors (also same-page) over dist/
+pnpm run check:toc       # the page-contents rail: placement, fold, scroll-spy
+pnpm run check:overflow  # no horizontal scroll at 320/360/390/414px  (@noeta/theme)
+pnpm run check:chrome    # header folds into a working drawer         (@noeta/theme)
+```
+
+All four run against a build (`pnpm run build` first). `check:toc` and the two theme guards
+drive Chromium through `playwright-core`; set `CHROME_CHECK_SKIP=1` where there is none.
+
 ## Local development
 
 ```sh

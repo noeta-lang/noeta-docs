@@ -132,6 +132,13 @@ jobs:
         # binary / para repos unreachable) are tolerated as warnings.
         run: pnpm run check:links
 
+      - name: Check the page-contents rail
+        # Renders the built site and measures the "On this page" column: a real
+        # third column at desktop width, a disclosure below --bp-rail, and a
+        # scroll-spy that follows the reader. Reuses the Chromium installed for
+        # the OG image above.
+        run: pnpm run check:toc
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v4
         with:

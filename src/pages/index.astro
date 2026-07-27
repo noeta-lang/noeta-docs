@@ -12,6 +12,6 @@ const { Content, headings } = await render(entry);
 const title = headings.find((h) => h.depth === 1)?.text ?? "Noeta";
 ---
 
-<DocsShell slug="home" sourcePath={entry.id} title={title}>
+<DocsShell slug="home" sourcePath={entry.id} title={title} headings={headings}>
   <Content />
 </DocsShell>

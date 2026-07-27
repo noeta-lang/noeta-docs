@@ -1,19 +1,32 @@
 ---
-/* Docs chrome: sidebar (pagefind search + _Sidebar.md nav), the article body
- * (slot — Astro's <Content />), updated-on, edit-on-GitHub, and prev/next
- * paging. Slugs live at the site root: Home at /, others at /<slug>. */
+/* Docs chrome: sidebar (pagefind search + _Sidebar.md nav), the page-contents
+ * rail, the article body (slot — Astro's <Content />), updated-on,
+ * edit-on-GitHub, and prev/next paging. Slugs live at the site root: Home at /,
+ * others at /<slug>. */
 import Search from "astro-pagefind/components/Search.astro";
 import Base from "../layouts/Base.astro";
 import { getSidebar, getSidebarLinks, getParaLib, getStdModule } from "../lib/docs.mjs";
 import { listDocs } from "../../scripts/docs-meta.mjs";
 import { SITE } from "../lib/site";
+import type { MarkdownHeading } from "astro";
 
 interface Props {
   slug: string;
   sourcePath: string;
   title: string;
+  headings: MarkdownHeading[];
 }
-const { slug, sourcePath, title } = Astro.props;
+const { slug, sourcePath, title, headings } = Astro.props;
+
+// Page contents. h2/h3 only: h1 is the page title (it is already the <title>
+// and the active sidebar row), and h4 is a mono label inside a section rather
+// than somewhere you navigate to. These slugs are Astro's; the ids in the
+// rendered HTML are rehype-slug's. They agree today — and check-links.mjs
+// checks every one of these fragments against the built page, so if they ever
+// stop agreeing the build fails instead of the reader's click.
+const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3 && h.slug && h.text.trim());
+// One entry is not a table of contents, it is a link into the middle of the page.
+const showToc = toc.length > 1;
 
 const sidebar = getSidebar();
 const links = getSidebarLinks();
@@ -187,6 +200,28 @@ const formatDate = (iso: string) => iso.slice(0, 10);
       </script>
     </aside>
 
+    {
+      showToc && (
+        /* Page contents. Above --bp-rail (78rem) this is the sticky right-hand
+           rail and the summary is just its label; below it the same element is a
+           collapsed disclosure sitting above the article, because a third column
+           has nowhere to go. Ships `open` so a no-JS reader gets the list in
+           either layout; the script below closes it in the narrow one. */
+        <details class="docs-toc" open>
+          <summary>On this page</summary>
+          <nav aria-label="On this page">
+            <ul>
+              {toc.map((h) => (
+                <li class={h.depth === 3 ? "toc-sub" : undefined}>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </details>
+      )
+    }
+
     <article class="docs-article" data-pagefind-body>
       <header class="docs-article-head" data-pagefind-ignore>
         <time class="ts" datetime={dateModified}>Updated {formatDate(dateModified)}</time>
@@ -219,5 +254,97 @@ const formatDate = (iso: string) => iso.slice(0, 10);
         )
       }
     </article>
+
+    <script is:inline>
+      // Collapse the contents list below --bp-rail (78rem), where it is a
+      // disclosure above the article rather than a rail beside it — on a
+      // reference page it is eighty rows and would bury the prose. Inline
+      // rather than a bundled module for the same reason as the sidebar's:
+      // deferred, the open list paints first and the page jumps. And as there,
+      // CSS cannot force a closed <details> open, so the wide layout needs this
+      // script to reopen it.
+      (() => {
+        const box = document.querySelector("details.docs-toc");
+        if (!box) return;
+        const inline = window.matchMedia("(max-width: 78rem)");
+        const sync = () => {
+          box.open = !inline.matches;
+        };
+        sync();
+        inline.addEventListener("change", sync);
+      })();
+    </script>
+    <script is:inline>
+      // Scroll-spy: mark the section the reader is actually in. Placed after the
+      // article so the heading elements exist when it runs.
+      //
+      // Position, not IntersectionObserver: an observer band leaves nothing
+      // active whenever a section is taller than the viewport, which on these
+      // pages is most of them. This asks instead which heading was the last to
+      // cross the reading line just under the sticky header — always exactly one
+      // answer, and the same answer the reader would give.
+      (() => {
+        const box = document.querySelector("details.docs-toc");
+        if (!box) return;
+        const targets = [...box.querySelectorAll("a[href^='#']")]
+          .map((a) => ({ a, el: document.getElementById(decodeURIComponent(a.hash.slice(1))) }))
+          .filter((t) => t.el);
+        if (targets.length < 2) return;
+
+        const head = document.querySelector(".site-head");
+        let active = null;
+
+        const mark = (next) => {
+          if (next === active) return;
+          if (active) {
+            active.a.classList.remove("active");
+            active.a.removeAttribute("aria-current");
+          }
+          active = next;
+          if (!active) return;
+          active.a.classList.add("active");
+          active.a.setAttribute("aria-current", "true");
+          // A long list scrolls inside the rail; keep the active row visible
+          // there without touching the page's own scroll position.
+          if (box.scrollHeight > box.clientHeight) {
+            const row = active.a.getBoundingClientRect();
+            const rail = box.getBoundingClientRect();
+            if (row.top < rail.top + 8) box.scrollTop += row.top - rail.top - 8;
+            else if (row.bottom > rail.bottom - 8) box.scrollTop += row.bottom - rail.bottom + 8;
+          }
+        };
+
+        const update = () => {
+          const line = (head ? head.getBoundingClientRect().bottom : 0) + 24;
+          let current = null;
+          for (const t of targets) {
+            if (t.el.getBoundingClientRect().top > line) break;
+            current = t;
+          }
+          // At the bottom of the page the last section is the one being read
+          // even if its heading never reached the line — a short final section
+          // otherwise leaves the previous one highlighted for good.
+          const doc = document.documentElement;
+          if (window.innerHeight + window.scrollY >= doc.scrollHeight - 2) {
+            current = targets[targets.length - 1];
+          }
+          mark(current);
+        };
+
+        let queued = false;
+        const schedule = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            queued = false;
+            update();
+          });
+        };
+
+        addEventListener("scroll", schedule, { passive: true });
+        addEventListener("resize", schedule);
+        update();
+      })();
+    </script>
   </main>
 </Base>
