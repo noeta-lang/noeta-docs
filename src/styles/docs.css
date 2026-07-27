@@ -190,6 +190,13 @@
 /* pagefind searchbox (@pagefind/component-ui) inside the modal, themed via --pf-* vars */
 pagefind-searchbox.docs-search {
   display: block;
+  /* Fill the dialog. The control defaults to a 480px max-width and is an
+   * inline-block, so in the wider modal it sat flush left — 80px off centre,
+   * which reads as the whole modal being misaligned. Setting it here rather
+   * than overriding .pf-searchbox directly because pagefind hardens that rule
+   * with a :is(*,#\#) specificity hack that no ordinary selector can outrank.
+   * Vertical placement stays deliberate: 11vh from the top, palette style. */
+  --pf-searchbox-max-width: 100%;
   --pf-font: var(--font-body);
   --pf-text: var(--text-0);
   --pf-text-secondary: var(--text-1);
