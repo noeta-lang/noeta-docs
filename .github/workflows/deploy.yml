@@ -126,6 +126,12 @@ jobs:
       - name: Build (docs sync + site + pagefind + OG image)
         run: pnpm run build
 
+      - name: Check internal links and anchors
+        # Fails the deploy on any dead internal link or anchor in the built site.
+        # Links into a generated section that was skipped this build (no released
+        # binary / para repos unreachable) are tolerated as warnings.
+        run: pnpm run check:links
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v4
         with:
