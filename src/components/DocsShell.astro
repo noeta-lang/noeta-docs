@@ -170,6 +170,21 @@ const formatDate = (iso: string) => iso.slice(0, 10);
           compact.addEventListener("change", sync);
         })();
       </script>
+      <script is:inline>
+        // Bring the active link into view on arrival — the tree is long, and a
+        // deep link (a std module, an internals page) otherwise lands with the
+        // highlighted item below the sidebar's own fold. Centered, not
+        // scrollIntoView: the latter also scrolls the page itself. Inline for
+        // the same no-flash reason as above. No-op when the sidebar doesn't
+        // scroll (mobile's static layout, short trees).
+        (() => {
+          const box = document.querySelector(".docs-sidebar");
+          const active = box && box.querySelector(".docs-nav a.active");
+          if (!box || !active || box.scrollHeight <= box.clientHeight) return;
+          const offset = active.getBoundingClientRect().top - box.getBoundingClientRect().top;
+          box.scrollTop += offset - box.clientHeight / 2;
+        })();
+      </script>
     </aside>
 
     <article class="docs-article" data-pagefind-body>
