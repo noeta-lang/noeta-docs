@@ -22,6 +22,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createHighlighter } from "shiki";
 import { splitSample } from "./noeta-sample.mjs";
+import { copyButton } from "@noeta/theme/copy";
 
 // Resolved from the project root, not import.meta.url: og.astro imports this
 // module too, and prerendered pages are bundled into dist/.prerender/chunks/,
@@ -127,8 +128,11 @@ function collect(node, found) {
   });
 }
 
-/** Highlight one block into a `<pre class="noeta-code">…</pre>`. */
-function render(highlighter, code) {
+/**
+ * Highlight one block into a `<pre class="noeta-code">…</pre>`. `codeAttr`, when given, is a bare
+ * attribute stamped on the inner `<code>` — how a folded block marks itself as the copy payload.
+ */
+function render(highlighter, code, codeAttr = "") {
   return highlighter.codeToHtml(code, {
     lang: "noeta",
     theme: "noeta-ink-signal",
@@ -136,6 +140,9 @@ function render(highlighter, code) {
       {
         pre(node) {
           this.addClassToHast(node, "noeta-code");
+        },
+        code(node) {
+          if (codeAttr) node.properties[codeAttr] = "";
         },
       },
     ],
@@ -155,13 +162,19 @@ export default function remarkNoetaCode() {
       // away — the markers used to render literally, so the page carried a
       // stray comment AND still showed every line it meant to fold.
       const sample = splitSample(parent.children[index].value);
+      // `.snippet` is the shared copy-button shell from @noeta/theme.
+      //
+      // A folded block marks the FULL program `data-copy-source`, so the button copies what
+      // compiles rather than what is on screen: the visible region is a fragment by construction —
+      // the context was folded precisely because the fragment needs it — and a copy button that
+      // hands back code that cannot run is worse than no button.
       const value = sample.hasContext
-        ? `<div class="noeta-sample">${render(highlighter, sample.visible)}` +
+        ? `<div class="noeta-sample snippet">${render(highlighter, sample.visible)}` +
           `<details class="noeta-sample-full">` +
           `<summary>Show full example</summary>` +
-          `${render(highlighter, sample.full)}` +
-          `</details></div>`
-        : render(highlighter, sample.full);
+          `${render(highlighter, sample.full, "data-copy-source")}` +
+          `</details>${copyButton()}</div>`
+        : `<div class="snippet">${render(highlighter, sample.full)}${copyButton()}</div>`;
       parent.children[index] = { type: "html", value };
     }
   };

@@ -6,6 +6,7 @@ import "@noeta/theme/theme.css";
 import "../styles/docs.css";
 import BaseHead from "../components/BaseHead.astro";
 import { renderHeader, renderFooter, DRAWER_SCRIPT } from "@noeta/theme/chrome";
+import { COPY_CSS, COPY_SCRIPT } from "@noeta/theme/copy";
 import { SITE } from "../lib/site";
 
 interface Props {
@@ -27,6 +28,10 @@ const { title, description, path, article } = Astro.props;
 <html lang="en" data-layout="wide">
   <head>
     <BaseHead title={title} description={description} path={path} article={article} />
+    {/* The copy button's styles come from @noeta/theme as source, not a stylesheet, so the
+        registry Worker (which has no build step) and this site share one definition instead of
+        keeping two in lockstep by hand — the arrangement that let the site chrome drift. */}
+    <style is:inline set:html={COPY_CSS} />
   </head>
   <body>
     <div class="field" aria-hidden="true"></div>
@@ -34,5 +39,6 @@ const { title, description, path, article } = Astro.props;
     <slot />
     <Fragment set:html={renderFooter({ site: "docs" })} />
     <script is:inline set:html={DRAWER_SCRIPT} />
+    <script is:inline set:html={COPY_SCRIPT} />
   </body>
 </html>

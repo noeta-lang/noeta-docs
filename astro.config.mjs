@@ -5,6 +5,7 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 import pagefind from "astro-pagefind";
 import rehypeSlug from "rehype-slug";
+import rehypeCopyButton from "./src/lib/rehype-copy-button.mjs";
 import remarkDocLinks from "./src/lib/doc-links-remark.mjs";
 import remarkNoetaCode from "./src/lib/remark-noeta-code.mjs";
 import remarkAlerts from "./src/lib/remark-alerts.mjs";
@@ -41,6 +42,6 @@ export default defineConfig({
     },
     smartypants: false,
     remarkPlugins: [remarkDocLinks, remarkNoetaCode, remarkAlerts],
-    rehypePlugins: [rehypeSlug],
+    rehypePlugins: [rehypeSlug, rehypeCopyButton],
   },
 });
