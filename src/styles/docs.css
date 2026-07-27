@@ -220,13 +220,29 @@ pagefind-searchbox.docs-search input {
   font-size: 0.85rem;
 }
 
-/* The results panel defaults to `top: 100%` with no top border, so it sits flush against the
-   input and hides its focus border. Drop it a few pixels and give it its own full border/radius so
-   the input reads as a separate, complete field above the results. */
-pagefind-searchbox.docs-search .pf-searchbox-dropdown {
+/* pagefind joins the input and its dropdown into a single shape: the dropdown sits flush at
+   `top: 100%` and the two square off their facing corners. The input's focus ring is a box-shadow,
+   which occupies no layout space, so the dropdown paints straight over it and the field looks like
+   it has lost its bottom border. Separate them — a small gap clearing the 2px ring, and a full
+   radius on each so both read as complete elements.
+
+   The selector has to mirror pagefind's own `:is(*,#\#)` specificity hack, which scores (3,1,0) and
+   silently outranks anything ordinary. The previous version of this rule was a plain
+   `pagefind-searchbox.docs-search .pf-searchbox-dropdown` at (0,2,1); it stopped applying when
+   pagefind adopted the hack, which is how the overlap came back unnoticed. (3,2,0) wins without
+   reaching for !important. */
+:is(*, #\#):is(*, #\#):is(*, #\#) .docs-search-dialog .pf-searchbox-dropdown {
   top: calc(100% + 6px);
   border-top: 1px solid var(--pf-border);
   border-radius: var(--pf-border-radius);
+}
+
+/* The squared bottom corners are set per-corner by `.pf-searchbox.open .pf-searchbox-input`
+   at (3,3,0), so this has to name the open state too — a shorthand `border-radius` on the
+   input alone is outranked and does nothing. */
+:is(*, #\#):is(*, #\#):is(*, #\#) .docs-search-dialog .pf-searchbox.open .pf-searchbox-input {
+  border-bottom-right-radius: var(--pf-border-radius);
+  border-bottom-left-radius: var(--pf-border-radius);
 }
 
 pagefind-searchbox.docs-search mark {
