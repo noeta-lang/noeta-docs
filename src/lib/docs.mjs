@@ -20,6 +20,18 @@ export { pathForSlug };
 // top-level link — its collapsible group. Every link entry carries `children`
 // (usually empty). Falls back to a flat, title-sorted list when _Sidebar.md is
 // absent.
+/**
+ * `kind` discriminates the two entry shapes, so it has to carry a literal type:
+ * left to inference these object literals widen to `{ kind: string, … }`,
+ * `entry.kind === "link"` then narrows nothing, and every consumer's
+ * `entry.path` / `entry.children` is a type error. Hence the annotations.
+ *
+ * @typedef {{ kind: "section", title: string }} SidebarSection
+ * @typedef {{ kind: "link", title: string, slug: string, path: string, children: SidebarLink[] }} SidebarLink
+ * @typedef {SidebarSection | SidebarLink} SidebarEntry
+ *
+ * @returns {SidebarEntry[]}
+ */
 export function getSidebar() {
   const docs = listDocs();
   const haveSlug = new Set(docs.map((d) => d.slug));
@@ -27,13 +39,16 @@ export function getSidebar() {
 
   if (existsSync(sidebarPath)) {
     const items = parseSidebar(readFileSync(sidebarPath, "utf-8"));
+    /** @type {SidebarEntry[]} */
     const out = [];
+    /** @type {SidebarLink | null} */
     let lastLink = null;
     for (const item of items) {
       if (item.kind === "section") {
         out.push({ kind: "section", title: item.title });
         lastLink = null;
       } else if (item.kind === "link" && haveSlug.has(item.slug)) {
+        /** @type {SidebarLink} */
         const entry = {
           kind: "link",
           title: item.title,
@@ -57,10 +72,12 @@ export function getSidebar() {
 
 // Ordered list of just the sidebar link entries, groups flattened in reading
 // order (parent, then its children) — used for prev/next paging.
+/** @returns {SidebarLink[]} */
 export function getSidebarLinks() {
-  return getSidebar()
-    .filter((e) => e.kind === "link")
-    .flatMap((e) => [e, ...e.children]);
+  // One flatMap rather than filter-then-flatMap: a filter does not narrow the
+  // union, so the `.children` in the second step would be reading a property
+  // the section shape does not have.
+  return getSidebar().flatMap((e) => (e.kind === "link" ? [e, ...e.children] : []));
 }
 
 // The para-library page manifest written by scripts/sync-para.mjs: docs whose

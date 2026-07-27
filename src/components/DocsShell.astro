@@ -28,6 +28,17 @@ const toc = headings.filter((h) => h.depth >= 2 && h.depth <= 3 && h.slug && h.t
 // One entry is not a table of contents, it is a link into the middle of the page.
 const showToc = toc.length > 1;
 
+// h3s nest under the h2 they belong to, so the rail can show the sections and
+// only expand the one being read — std.http has 86 headings, and a flat list of
+// them is a wall, not a map. A page whose first headings are h3s (no h2 above
+// them) keeps them at the top level rather than inventing a parent.
+const tocGroups: { heading: (typeof toc)[number]; children: typeof toc }[] = [];
+for (const h of toc) {
+  const top = tocGroups[tocGroups.length - 1];
+  if (h.depth === 2 || !top) tocGroups.push({ heading: h, children: [] });
+  else top.children.push(h);
+}
+
 const sidebar = getSidebar();
 const links = getSidebarLinks();
 const idx = links.findIndex((l) => l.slug === slug);
@@ -211,9 +222,18 @@ const formatDate = (iso: string) => iso.slice(0, 10);
           <summary>On this page</summary>
           <nav aria-label="On this page">
             <ul>
-              {toc.map((h) => (
-                <li class={h.depth === 3 ? "toc-sub" : undefined}>
-                  <a href={`#${h.slug}`}>{h.text}</a>
+              {tocGroups.map((group) => (
+                <li class={group.heading.depth === 3 ? "toc-sub" : undefined}>
+                  <a href={`#${group.heading.slug}`}>{group.heading.text}</a>
+                  {group.children.length > 0 && (
+                    <ul>
+                      {group.children.map((child) => (
+                        <li class="toc-sub">
+                          <a href={`#${child.slug}`}>{child.text}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               ))}
             </ul>
@@ -293,6 +313,14 @@ const formatDate = (iso: string) => iso.slice(0, 10);
 
         const head = document.querySelector(".site-head");
         let active = null;
+        let openGroup = null;
+
+        // Collapse the sub-sections down to the one being read. Set from script,
+        // so a reader without JS still gets the whole list rather than a rail
+        // that hides most of itself and never expands. The rail styles honour
+        // it; the folded disclosure ignores it, since opening that one is
+        // already a deliberate "show me everything".
+        box.dataset.grouped = "";
 
         const mark = (next) => {
           if (next === active) return;
@@ -301,11 +329,20 @@ const formatDate = (iso: string) => iso.slice(0, 10);
             active.a.removeAttribute("aria-current");
           }
           active = next;
+          // Expand the group the active row belongs to — closest() walks up to
+          // the outermost <li>, so an h3 opens its own h2's group.
+          const group = active ? active.a.closest(".docs-toc > nav > ul > li") : null;
+          if (group !== openGroup) {
+            if (openGroup) openGroup.classList.remove("current");
+            if (group) group.classList.add("current");
+            openGroup = group;
+          }
           if (!active) return;
           active.a.classList.add("active");
           active.a.setAttribute("aria-current", "true");
           // A long list scrolls inside the rail; keep the active row visible
-          // there without touching the page's own scroll position.
+          // there without touching the page's own scroll position. Measured
+          // after the group above expanded, so the row's position is final.
           if (box.scrollHeight > box.clientHeight) {
             const row = active.a.getBoundingClientRect();
             const rail = box.getBoundingClientRect();

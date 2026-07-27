@@ -129,8 +129,14 @@ try {
         railBottom: t.bottom,
         articleRight: a.right,
         articleWidth: a.width,
+        grouped: toc.hasAttribute("data-grouped"),
         linkCount: toc.querySelectorAll("a").length,
-        renderedLinks: [...toc.querySelectorAll("a")].filter((a2) => a2.offsetHeight > 0).length,
+        topLinks: toc.querySelectorAll(":scope > nav > ul > li > a").length,
+        topRendered: [...toc.querySelectorAll(":scope > nav > ul > li > a")].filter((el) => el.offsetHeight > 0)
+          .length,
+        subLinks: toc.querySelectorAll(":scope > nav > ul > li > ul a").length,
+        subRendered: [...toc.querySelectorAll(":scope > nav > ul > li > ul a")].filter((el) => el.offsetHeight > 0)
+          .length,
         viewport: window.innerHeight,
         horizontal: document.documentElement.scrollWidth - window.innerWidth,
       };
@@ -159,8 +165,15 @@ try {
             `viewport instead of scrolling inside itself`,
         );
       }
-      if (layout.renderedLinks !== layout.linkCount) {
-        fail(`${layout.linkCount - layout.renderedLinks} of ${layout.linkCount} rail links render at 0px`);
+      // Every section row must be there. Their sub-headings must not: the rail
+      // groups h3s under their h2 and shows only the section being read, which
+      // is the difference between a map and an 86-row wall.
+      if (!layout.grouped) fail("the rail is not marked [data-grouped] — the spy did not enhance it");
+      if (layout.topRendered !== layout.topLinks) {
+        fail(`${layout.topLinks - layout.topRendered} of ${layout.topLinks} section rows render at 0px`);
+      }
+      if (layout.subLinks > 0 && layout.subRendered >= layout.subLinks) {
+        fail(`all ${layout.subLinks} sub-headings are showing at the top of the page — the grouping collapsed nothing`);
       }
       if (layout.horizontal > 0) fail(`the page scrolls horizontally by ${layout.horizontal}px at 1400px`);
     }
@@ -193,6 +206,9 @@ try {
         const rail = toc.getBoundingClientRect();
         return row.top >= rail.top - 1 && row.bottom <= rail.bottom + 1;
       })();
+      // A probe inside a collapsed group only renders if reaching its section
+      // expanded that group — which is the whole grouping contract.
+      const probeRendered = probe.offsetHeight > 0;
       const wanted = probe.getAttribute("href");
       // …and at the very bottom of the page, the last section is the live one.
       window.scrollTo(0, document.documentElement.scrollHeight);
@@ -202,6 +218,7 @@ try {
         wanted,
         got: active ? active.getAttribute("href") : null,
         rowVisible,
+        probeRendered,
         lastWanted: links[links.length - 1].getAttribute("href"),
         lastGot: atEnd ? atEnd.getAttribute("href") : null,
       };
@@ -209,6 +226,8 @@ try {
 
     if (spy.got !== spy.wanted) {
       fail(`scrolled to ${spy.wanted}, but the rail marks ${spy.got ?? "nothing"} as active`);
+    } else if (!spy.probeRendered) {
+      fail(`the active row ${spy.wanted} is marked but still collapsed inside its group`);
     } else if (!spy.rowVisible) {
       fail(`the active row ${spy.wanted} is marked but scrolled out of the rail's own overflow`);
     }
@@ -218,8 +237,8 @@ try {
 
     if (!failures.length) {
       console.log(
-        `  [toc] 1400px: ${mostLinks}-entry rail beside a ${Math.round(layout.articleWidth)}px article, ` +
-          `spy tracks the reader`,
+        `  [toc] 1400px: ${layout.topLinks} sections (${layout.subLinks} sub-headings grouped) beside a ` +
+          `${Math.round(layout.articleWidth)}px article, spy tracks the reader`,
       );
     }
     await context.close();

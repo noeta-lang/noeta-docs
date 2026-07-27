@@ -420,7 +420,25 @@ pagefind-searchbox.docs-search input {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+/* One hairline down the whole list, not one per nesting level. */
+.docs-toc > nav > ul {
   border-left: 1px solid var(--line);
+}
+
+/* Grouped: a section's sub-headings show only while that section is the one
+ * being read. std.http has 86 headings; flat, that is a wall rather than a map,
+ * and the rail's whole purpose is showing the reader where they are. The spy
+ * sets both [data-grouped] and .current, so without JS the full list stands —
+ * a rail that hid most of itself and could never expand would be worse than a
+ * long one. */
+.docs-toc[data-grouped] li > ul {
+  display: none;
+}
+
+.docs-toc[data-grouped] li.current > ul {
+  display: block;
 }
 
 /* The active marker is a 2px border pulled one pixel left, so it lands *on* the
@@ -466,7 +484,10 @@ pagefind-searchbox.docs-search input {
  * and two collapsed lists that do the same thing should look the same. That
  * means the UA disclosure marker too — which has to be restated here, because
  * the rail above turns list-style off and an author rule outranks the UA's
- * details[open] switch. */
+ * details[open] switch. `inside` is part of that: the rail's `list-style: none`
+ * resets the position to `outside` as well, and an outside marker hangs into
+ * the margin, which left this row sitting a marker's width to the left of the
+ * "Contents" toggle directly above it. */
 @media (max-width: 78rem) {
   .docs-toc {
     position: static;
@@ -476,7 +497,7 @@ pagefind-searchbox.docs-search input {
 
   .docs-toc > summary {
     display: list-item;
-    list-style-type: disclosure-closed;
+    list-style: disclosure-closed inside;
     pointer-events: auto;
     cursor: pointer;
     font-size: 0.85rem;
@@ -491,6 +512,13 @@ pagefind-searchbox.docs-search input {
 
   .docs-toc nav {
     padding-bottom: 0.4rem;
+  }
+
+  /* Opening the folded disclosure is already a deliberate "show me the page",
+   * and nothing is being read yet when it opens — so it lists everything
+   * rather than one expanded section. */
+  .docs-toc[data-grouped] li > ul {
+    display: block;
   }
 }
 

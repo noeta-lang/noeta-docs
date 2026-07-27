@@ -126,6 +126,12 @@ jobs:
       - name: Build (docs sync + site + pagefind + OG image)
         run: pnpm run build
 
+      - name: Typecheck
+        # `astro check` over the pages, components and the JSDoc-typed lib/
+        # modules. After the build because it needs the synced content
+        # collection to be present.
+        run: pnpm run typecheck
+
       - name: Check internal links and anchors
         # Fails the deploy on any dead internal link or anchor in the built site.
         # Links into a generated section that was skipped this build (no released
