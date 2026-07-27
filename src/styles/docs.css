@@ -716,6 +716,53 @@ pagefind-searchbox.docs-search input {
   color: var(--text-0);
 }
 
+/* sample folding (`// sample:start`) — the marked region renders as an ordinary
+ * code block, and the whole compilable program sits behind an expander. The
+ * wrapper collapses the gap between the two so an opened example still reads as
+ * one unit, and the summary is a quiet control: this is an escape hatch for the
+ * reader who wants the context, not a call to action. */
+.docs-prose .noeta-sample > pre {
+  margin-bottom: 0.45rem;
+}
+
+.docs-prose .noeta-sample-full {
+  margin: 0 0 1.4rem;
+}
+
+.docs-prose .noeta-sample-full > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  width: fit-content;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding: 0.1rem 0.2rem;
+  border-radius: calc(var(--radius) / 2);
+  transition: color 120ms ease;
+}
+
+.docs-prose .noeta-sample-full > summary::marker,
+.docs-prose .noeta-sample-full > summary::-webkit-details-marker {
+  color: var(--text-2);
+}
+
+.docs-prose .noeta-sample-full > summary:hover {
+  color: var(--text-0);
+}
+
+.docs-prose .noeta-sample-full > summary:focus-visible {
+  outline: 2px solid var(--accent-2-bright);
+  outline-offset: 2px;
+}
+
+/* The expanded block carries the block spacing the collapsed summary gave up. */
+.docs-prose .noeta-sample-full[open] > pre {
+  margin-top: 0.6rem;
+}
+
 /* shiki (non-noeta fences) — dual-theme custom props follow the site mode.
  * The block background comes from the theme surface (above); only the token
  * foregrounds switch here. */

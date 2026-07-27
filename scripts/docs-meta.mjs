@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { resolve, basename } from "node:path";
 import { parseSidebar, sidebarLinkSlugs } from "./parse-sidebar.mjs";
 import { rewriteDocLinks, toDocSlug } from "./doc-links.mjs";
+import { stripSampleMarkers } from "../src/lib/noeta-sample.mjs";
 
 // Resolve from the project root (process.cwd()) so this keeps working when
 // Astro bundles it into dist/.prerender/.
@@ -69,7 +70,11 @@ export function listDocs() {
     const titleMatch = raw.match(/^#\s+(.+)\s*$/m);
     const title = titleMatch ? titleMatch[1].trim() : sourcePath.replace(/-/g, " ");
     const description = extractDescription(raw);
-    const markdown = rewriteDocLinks(raw);
+    // The raw `/<slug>.md` endpoints serve source to agents and curl, so the
+    // whole compilable program stays — only the `// sample:*` markers come out.
+    // Folding here would hand a reader code that does not compile; leaving the
+    // markers in makes them read as part of the language.
+    const markdown = stripSampleMarkers(rewriteDocLinks(raw));
     const { datePublished, dateModified } = fileDates(filePath);
     return { slug, title, sourcePath, description, datePublished, dateModified, markdown };
   });

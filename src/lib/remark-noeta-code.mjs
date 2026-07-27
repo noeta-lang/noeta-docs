@@ -21,6 +21,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createHighlighter } from "shiki";
+import { splitSample } from "./noeta-sample.mjs";
 
 // Resolved from the project root, not import.meta.url: og.astro imports this
 // module too, and prerendered pages are bundled into dist/.prerender/chunks/,
@@ -126,6 +127,21 @@ function collect(node, found) {
   });
 }
 
+/** Highlight one block into a `<pre class="noeta-code">…</pre>`. */
+function render(highlighter, code) {
+  return highlighter.codeToHtml(code, {
+    lang: "noeta",
+    theme: "noeta-ink-signal",
+    transformers: [
+      {
+        pre(node) {
+          this.addClassToHast(node, "noeta-code");
+        },
+      },
+    ],
+  });
+}
+
 export default function remarkNoetaCode() {
   return async (tree) => {
     const found = [];
@@ -133,20 +149,20 @@ export default function remarkNoetaCode() {
     if (found.length === 0) return;
     const highlighter = await getHighlighter();
     for (const { parent, index } of found) {
-      parent.children[index] = {
-        type: "html",
-        value: highlighter.codeToHtml(parent.children[index].value, {
-          lang: "noeta",
-          theme: "noeta-ink-signal",
-          transformers: [
-            {
-              pre(node) {
-                this.addClassToHast(node, "noeta-code");
-              },
-            },
-          ],
-        }),
-      };
+      // A block may mark the region worth reading with `// sample:start` /
+      // `// sample:end`; everything outside it is context that only has to
+      // compile. Show the marked region, and keep the whole program one click
+      // away — the markers used to render literally, so the page carried a
+      // stray comment AND still showed every line it meant to fold.
+      const sample = splitSample(parent.children[index].value);
+      const value = sample.hasContext
+        ? `<div class="noeta-sample">${render(highlighter, sample.visible)}` +
+          `<details class="noeta-sample-full">` +
+          `<summary>Show full example</summary>` +
+          `${render(highlighter, sample.full)}` +
+          `</details></div>`
+        : render(highlighter, sample.full);
+      parent.children[index] = { type: "html", value };
     }
   };
 }
