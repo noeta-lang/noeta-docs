@@ -1,0 +1,3 @@
+# Cloudflare Workers static-assets redirects.
+# The hand-written std modules page was replaced by the generated reference (scripts/sync-std.mjs).
+/standard-library-modules /std 301

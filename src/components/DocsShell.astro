@@ -4,7 +4,7 @@
  * paging. Slugs live at the site root: Home at /, others at /<slug>. */
 import Search from "astro-pagefind/components/Search.astro";
 import Base from "../layouts/Base.astro";
-import { getSidebar, getSidebarLinks, getParaLib } from "../lib/docs.mjs";
+import { getSidebar, getSidebarLinks, getParaLib, getStdModule } from "../lib/docs.mjs";
 import { listDocs } from "../../scripts/docs-meta.mjs";
 import { SITE } from "../lib/site";
 
@@ -23,12 +23,14 @@ const next = idx >= 0 && idx < links.length - 1 ? links[idx + 1] : null;
 
 const path = slug === "home" ? "/" : `/${slug}`;
 // Para-library pages mirror a repo's README (or, for the overview, a template
-// in this repo — its manifest entry carries the edit URL outright); everything
-// else lives in the noeta repo's docs/.
+// in this repo — its manifest entry carries the edit URL outright); std pages
+// are generated, so their edit link points at the intrinsic doc prose;
+// everything else lives in the noeta repo's docs/.
 const para = getParaLib(slug);
+const std = getStdModule(slug);
 const editUrl = para
   ? (para.edit ?? `https://github.com/${para.org}/${para.repo}/edit/${para.branch}/README.md`)
-  : `https://github.com/${SITE.docsRepo}/edit/${SITE.docsBranch}/docs/${sourcePath}.md`;
+  : (std?.edit ?? `https://github.com/${SITE.docsRepo}/edit/${SITE.docsBranch}/docs/${sourcePath}.md`);
 
 const info = listDocs().find((d) => d.slug === slug);
 const description = info?.description || undefined;

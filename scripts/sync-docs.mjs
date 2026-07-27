@@ -28,6 +28,7 @@ import { existsSync } from "node:fs";
 import { cp, readdir, rename, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { syncParaLibs } from "./sync-para.mjs";
+import { syncStdDocs } from "./sync-std.mjs";
 
 const repoRoot = process.cwd();
 const docsDir = resolve(repoRoot, "content", "docs");
@@ -99,8 +100,14 @@ try {
   }
 }
 
-// The para library pages are additive — a failure loses those pages but must
-// not take the docs build down with it.
+// The generated sections are additive — a failure loses those pages but must
+// not take the docs build down with it. Std first, then para: each appends its
+// own sidebar section, and this order is the order they render in.
+try {
+  syncStdDocs();
+} catch (err) {
+  console.warn(`[sync-std] WARNING: ${err.message}; building without the std reference`);
+}
 try {
   await syncParaLibs();
 } catch (err) {

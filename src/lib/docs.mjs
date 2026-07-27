@@ -47,7 +47,18 @@ export function getSidebarLinks() {
 // source is a library repo's README rather than the noeta docs/ dir. Returns
 // { org, repo, pkg, branch, slug } for a para page, null for regular docs.
 export function getParaLib(slug) {
-  const manifestPath = resolve(docsDir, "_para-libs.json");
+  return findInManifest("_para-libs.json", slug);
+}
+
+// The std-reference manifest written by scripts/sync-std.mjs: generated pages
+// whose "edit" target is the intrinsic registry source (or, for the overview,
+// the template in this repo). Returns { slug, edit } or null.
+export function getStdModule(slug) {
+  return findInManifest("_std-modules.json", slug);
+}
+
+function findInManifest(name, slug) {
+  const manifestPath = resolve(docsDir, name);
   if (!existsSync(manifestPath)) return null;
   try {
     return JSON.parse(readFileSync(manifestPath, "utf-8")).find((l) => l.slug === slug) ?? null;
