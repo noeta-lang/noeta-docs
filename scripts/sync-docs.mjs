@@ -29,6 +29,7 @@ import { cp, readdir, rename, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { syncParaLibs } from "./sync-para.mjs";
 import { syncStdDocs } from "./sync-std.mjs";
+import { syncDiagnostics } from "./sync-diagnostics.mjs";
 
 const repoRoot = process.cwd();
 const docsDir = resolve(repoRoot, "content", "docs");
@@ -112,4 +113,9 @@ try {
   await syncParaLibs();
 } catch (err) {
   console.warn(`[sync-para] WARNING: ${err.message}; building without para library pages`);
+}
+try {
+  syncDiagnostics();
+} catch (err) {
+  console.warn(`[sync-diagnostics] WARNING: ${err.message}; building without the diagnostics reference`);
 }
