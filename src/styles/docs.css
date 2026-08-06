@@ -686,6 +686,14 @@ pagefind-searchbox.docs-search input {
   margin: 2.4rem 0;
 }
 
+/* An h2 already carries the section rule (border-top above), so an author's `---`
+ * immediately before one drew a *second* line. The markdown means "section break"
+ * either way — here the heading is the break, so drop the redundant rule and let
+ * the heading keep its own spacing. */
+.docs-prose hr:has(+ h2) {
+  display: none;
+}
+
 /* code blocks: Astro's shiki pass (.astro-code) and the Noeta grammar pass
  * (.noeta-code, shiki over the real TextMate grammar with --syn-* foregrounds)
  * share one surface. Shiki inlines a theme background; override it so every
